@@ -3,9 +3,14 @@ import re
 import os
 
 DIR = os.getcwd()
+VERSION = "041023a"
 
 def commands(input):
     match input:
+        case "about":
+        case "help":
+            print("jshell version " + VERSION)
+
         case "pwd":
             print(DIR)
 
