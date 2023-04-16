@@ -14,7 +14,7 @@ def commands(input):
         print("jshell version " + VERSION)
 
     if input == "help":
-        print("commands: about, help, pwd, ls, cd, cd ..")
+        print("commands: about, help, pwd, ls, cd, date, time")
 
     if input == "pwd":
         print(DIR)
