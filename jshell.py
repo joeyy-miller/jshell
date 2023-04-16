@@ -40,8 +40,11 @@ def commands(input):
         print("Current Time =", current_time)
 
     if (re.match("cd(.*)", input)):
-        print("you cd'd")
-            
+        directory = int(input[1:])
+        try:
+            os.chdir(directory)
+        except ValueError:
+            print("Invalid directory")
 
 def main():
     os.system("clear")
