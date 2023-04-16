@@ -2,6 +2,7 @@ import sys
 import re
 import os
 from datetime import date
+from datetime import datetime
 
 DIR = os.getcwd()
 VERSION = "041023a"
@@ -32,6 +33,11 @@ def commands(input):
     if input == "date":
         today = date.today()
         print(today)
+    
+    if input == "time":
+        now = datetime.now()
+        current_time = now.strftime("%H:%M:%S")
+        print("Current Time =", current_time)
 
     if (re.match("cd(.*)", input)):
         print("you cd'd")
