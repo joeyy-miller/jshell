@@ -4,7 +4,7 @@ import os
 from datetime import date
 from datetime import datetime
 
-DIR = os.getcwd()
+DIR = ""
 VERSION = "041523d"
 
 def commands(input):
@@ -24,11 +24,6 @@ def commands(input):
         dir_list = os.listdir(os.getcwd()) 
         # prints all files
         print(dir_list)
-
-    if input == "cd .."
-        os.chdir("..")
-        DIR = os.path.abspath(os.curdir)
-        print ("Moved up to: " + DIR)
     
     if input == "date":
         today = date.today()
@@ -39,15 +34,23 @@ def commands(input):
         current_time = now.strftime("%H:%M:%S")
         print("Current Time =", current_time)
 
-    if (re.match("cd(.*)", input)):
-        directory = int(input[1:])
-        try:
-            os.chdir(directory)
-        except ValueError:
-            print("Invalid directory")
+    if (re.match("cd (.*)", input)):
+        if input == "cd ..":
+            os.chdir("..")
+            DIR = os.path.abspath(os.curdir)
+            print ("Moved up to: " + DIR)
+        else:
+            directory = input[3:]
+            try:
+                os.chdir(directory)
+            except FileNotFoundError:
+                print("Not a valid directory: " + directory)
+            except:
+                 print("Unkown: " + directory)
 
 def main():
     os.system("clear")
+    DIR = os.path.abspath(os.curdir)
     while True:
         print("$ ", end="")
         commands(input())
