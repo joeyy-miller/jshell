@@ -4,31 +4,35 @@ import os
 from datetime import date
 from datetime import datetime
 
-VERSION = "0230417e"
-DIRECTORY = ""
+
+class jshell:
+    key = ">" # Key to start a command
+    def __init__(self):
+        self.version = "0230417e"
+        self.directory = ""
+
+jsh = jshell()
 
 def commands(input):
-
-    global DIRECTORY
     
     # ABOUT about
     if input == "about":
-        jmsg("jshell version " + VERSION)
+        jmsg("jshell version " + jsh.version)
     
-    # CHANGE DIRECTORY cd
+    # CHANGE jsh.directory cd
     elif (re.match("cd (.*)", input)):
         if input == "cd ..":
             os.chdir("..")
-            DIRECTORY = os.path.abspath(os.curdir)
-            jmsg("Moved up to: " + DIRECTORY)
+            jsh.directory = os.path.abspath(os.curdir)
+            jmsg("Moved up to: " + jsh.directory)
         else:
-            directory = input[3:]
+            jsh.directory = input[3:]
             try:
-                os.chdir(directory)
+                os.chdir(jsh.directory)
             except FileNotFoundError:
-                print_err("not a valid directory: " + directory)
+                print_err("not a valid directory: " + jsh.directory)
             except:
-                print_err("Unkown: " + directory)
+                print_err("Unkown: " + jsh.directory)
         
     # ECHO DATE date    
     elif input == "date":
@@ -44,7 +48,7 @@ def commands(input):
         jmsg("deleting file" + remove_file)
         try:
             os.remove(remove_file)
-        except IsADirectoryError:
+        except IsAjsh.directoryError:
             rm_dir(remove_file)
         except FileNotFoundError:
             print_err("not a valid file: " + remove_file)
@@ -71,24 +75,24 @@ def commands(input):
         dir_list = os.listdir(os.getcwd()) 
         # prints all files
         max_length = -1;
-        for directory in dir_list:
-            if len(directory) > max_length:
-                max_length = len(directory)
+        for jsh.directory in dir_list:
+            if len(jsh.directory) > max_length:
+                max_length = len(jsh.directory)
         
         line_len = 70 # Max items per line
         count = 0 # Count the number of items printed
-        for directory in dir_list:
-            count += len(directory)
+        for jsh.directory in dir_list:
+            count += len(jsh.directory)
             if count >= line_len:
                 print(" ")
                 count = 0
-            isFile = os.path.isfile(directory)
+            isFile = os.path.isfile(jsh.directory)
             if isFile:
-                print(ANSI.color_text(35) + directory + ANSI.color_text(0), end=" ")
+                print(ANSI.color_text(35) + jsh.directory + ANSI.color_text(0), end=" ")
             else:
-                print(ANSI.color_text(34) + directory + ANSI.color_text(0), end=" ")
-            # print(directory + "  ", end=" ")
-            for i in range(max_length - len(directory)):
+                print(ANSI.color_text(34) + jsh.directory + ANSI.color_text(0), end=" ")
+            # print(jsh.directory + "  ", end=" ")
+            for i in range(max_length - len(jsh.directory)):
                 print(" ", end="")
                 count += 1
             
@@ -103,17 +107,25 @@ def commands(input):
         except:
             print_err("can't make file: " + new_file) 
 
-    # MAKE DIRECTORY mkdir or mkd
+    # MAKE jsh.directory mkdir or mkd
     elif (re.match("mkdir (.*)", input) or re.match("mkd (.*)", input)):
         try:
-            new_directory = input[6:]
-            os.mkdir(new_directory)
+            new_jsh.directory = input[6:]
+            os.mkdir(new_jsh.directory)
         except:
-            print_err("can't make directory: " + new_directory)
+            print_err("can't make jsh.directory: " + new_jsh.directory)
 
-    # PRINT WORKING DIRECTORY pwd
+    # PRINT WORKING jsh.directory pwd
     elif input == "pwd":
-        jmsg(DIRECTORY)
+        jmsg(jsh.directory)
+
+    elif re.match("perm (.*)", input):
+        file_to_read = input[5:]
+        st = os.stat(file_to_read)
+        oct_perm = oct(st.st_mode)
+        mask = oct(os.stat(file_to_read).st_mode)[-3:]
+        print(mask)
+        print(oct_perm)
     
     # ECHO TIME time
     elif input == "time":
@@ -132,20 +144,22 @@ def print_err(err):
 def jmsg(msg):
     print(">jsh: " + msg)
 
-def rm_dir(directory):
+def jout(msg):
+    print(">" + msg)
+
+def rm_dir(rm_directory):
     try:
-        os.rmdir(directory)
-        jmsg("removed directory: " + directory)
+        os.rmdir(rm_directory)
+        jmsg("removed directory: " + rm_directory)
     except FileNotFoundError:
-        print_err("not a valid directory: " + directory)
+        print_err("not a valid directory: " + rm_directory)
     except:
-        print_err("can't remove directory: " + directory)
+        print_err("can't remove directory: " + rm_directory)
     
 
 def main():
     os.system("clear")
-    global DIRECTORY
-    DIRECTORY = os.path.abspath(os.curdir)
+    jsh.directory = os.path.abspath(os.curdir)
     while True:
         print("$ ", end="")
         commands(input())
