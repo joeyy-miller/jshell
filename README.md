@@ -1,7 +1,7 @@
-## jshell
+# jshell
 A very simple rudimentary command line shell that I developed in Python for personal use but it is encouraged to branch the code and create your own version.
 
-# Commands:
+## Commands:
 + about: 
 + help: 
 + pwd: 
