@@ -2,6 +2,7 @@ import sys
 import re
 import os
 import time
+import json
 from datetime import date
 from datetime import datetime
 
@@ -11,7 +12,7 @@ class jshell:
     def __init__(self):
         self.version = "0230417e"
         self.directory = ""
-
+        self.userkey = jsettings['UserString']
         
 class ANSI():
     def background(code):
@@ -23,15 +24,14 @@ class ANSI():
     def color_text(code):
         return "\33[{code}m".format(code=code)
 
-
 def print_err(err):
-    print(">jsh error: " + err)
+    print(jsh.userkey + "jsh error: " + err)
 
 def jmsg(msg):
-    print(">jsh: " + msg)
+    print(jsh.userkey + "jsh: " + str(msg))
 
 def jout(msg):
-    print(">" + msg)
+    print(jsh.userkey + str(msg))
 
 def rm_dir(rm_directory):
     try:
@@ -41,10 +41,8 @@ def rm_dir(rm_directory):
         print_err("not a valid directory: " + rm_directory)
     except:
         print_err("can't remove directory: " + rm_directory)
-    
 
 def commands(input):
-    
     # ABOUT about
     if input == "about":
         jmsg("jshell version " + jsh.version)
@@ -199,6 +197,13 @@ def main():
         print("$ ", end="")
         commands(input())
 
+usersettings = open("data.json", "r")
+
+jsettings = json.load(usersettings)
+
+
+# Creat the Jshell Object to store data about the perons shell
 jsh = jshell()
+
 
 main()
