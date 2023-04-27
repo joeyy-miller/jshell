@@ -12,7 +12,36 @@ class jshell:
         self.version = "0230417e"
         self.directory = ""
 
-jsh = jshell()
+        
+class ANSI():
+    def background(code):
+        return "\33[{code}m".format(code=code)
+ 
+    def style_text(code):
+        return "\33[{code}m".format(code=code)
+ 
+    def color_text(code):
+        return "\33[{code}m".format(code=code)
+
+
+def print_err(err):
+    print(">jsh error: " + err)
+
+def jmsg(msg):
+    print(">jsh: " + msg)
+
+def jout(msg):
+    print(">" + msg)
+
+def rm_dir(rm_directory):
+    try:
+        os.rmdir(rm_directory)
+        jmsg("removed directory: " + rm_directory)
+    except FileNotFoundError:
+        print_err("not a valid directory: " + rm_directory)
+    except:
+        print_err("can't remove directory: " + rm_directory)
+    
 
 def commands(input):
     
@@ -162,26 +191,6 @@ def commands(input):
     # UNKOWN COMMAND
     else:
         print_err("command not found: " + input)
-    
-
-def print_err(err):
-    print(">jsh error: " + err)
-
-def jmsg(msg):
-    print(">jsh: " + msg)
-
-def jout(msg):
-    print(">" + msg)
-
-def rm_dir(rm_directory):
-    try:
-        os.rmdir(rm_directory)
-        jmsg("removed directory: " + rm_directory)
-    except FileNotFoundError:
-        print_err("not a valid directory: " + rm_directory)
-    except:
-        print_err("can't remove directory: " + rm_directory)
-    
 
 def main():
     os.system("clear")
@@ -189,17 +198,7 @@ def main():
     while True:
         print("$ ", end="")
         commands(input())
-class ANSI():
-    def background(code):
-        return "\33[{code}m".format(code=code)
- 
-    def style_text(code):
-        return "\33[{code}m".format(code=code)
- 
-    def color_text(code):
-        return "\33[{code}m".format(code=code)
 
-#example_ansi = ANSI.background(97) + ANSI.color_text(35) + ANSI.style_text(4) + " TESTE ANSI ESCAPE CODE"
-#print(example_ansi)
+jsh = jshell()
 
 main()
