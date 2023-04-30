@@ -13,6 +13,7 @@ class jshell:
         self.version = "0230417e"
         self.directory = ""
         self.userkey = jsettings['UserString']
+        self.output = ""
         
 class ANSI():
     def background(code):
@@ -43,6 +44,7 @@ def rm_dir(rm_directory):
         print_err("can't remove directory: " + rm_directory)
 
 def commands(input):
+
     # ABOUT about
     if input == "about":
         jmsg("jshell version " + jsh.version)
@@ -65,6 +67,7 @@ def commands(input):
     # ECHO DATE date    
     elif input == "date":
         today = date.today()
+        jsh.output = today
         jmsg(today)
 
     # DELETE del
@@ -88,6 +91,7 @@ def commands(input):
     # ECHO echo
     elif (re.match("echo (.*)", input)):
         echo = input[5:]
+        jsh.ouput = echo
         print(echo)
 
     # EXIT exit
@@ -163,13 +167,17 @@ def commands(input):
     # MAKE jsh.directory mkdir or mkd
     elif (re.match("mkdir (.*)", input) or re.match("mkd (.*)", input)):
         try:
-            new_jsh.directory = input[6:]
-            os.mkdir(new_jsh.directory)
+            jsh.directory = input[6:]
+            os.mkdir(jsh.directory)
         except:
-            print_err("can't make jsh.directory: " + new_jsh.directory)
+            print_err("can't make jsh.directory: " + jsh.directory)
+
+    elif input == "output" or input == "out":
+        print(jsh.output)
 
     # PRINT WORKING jsh.directory pwd
     elif input == "pwd":
+        jsh.ouput = jsh.directory
         jmsg(jsh.directory)
 
     elif re.match("perm (.*)", input):
@@ -184,6 +192,7 @@ def commands(input):
     elif input == "time":
         now = datetime.now()
         current_time = now.strftime("%H:%M:%S")
+        jsh.output = current_time
         jmsg("Current Time: " + current_time)
 
     # UNKOWN COMMAND
