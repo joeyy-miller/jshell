@@ -45,6 +45,14 @@ def rm_dir(rm_directory):
 
 def commands(input):
 
+    # Replace any variables
+    # Relace $output with the output of the last command
+    if re.match("^(.*?)output", input):
+        output_index = input.index("output")
+        new_str = input[:output_index] + str(jsh.output) + input[output_index + 6:]
+        input = new_str
+    
+    # Start checking input for commands
     # ABOUT about
     if input == "about":
         jmsg("jshell version " + jsh.version)
@@ -79,7 +87,7 @@ def commands(input):
         jmsg("deleting file" + remove_file)
         try:
             os.remove(remove_file)
-        except IsAjsh.directoryError:
+        except IsADirectoryError:
             rm_dir(remove_file)
         except FileNotFoundError:
             print_err("not a valid file: " + remove_file)
@@ -172,6 +180,7 @@ def commands(input):
         except:
             print_err("can't make jsh.directory: " + jsh.directory)
 
+    # OUTPUT output or out
     elif input == "output" or input == "out":
         print(jsh.output)
 
@@ -210,9 +219,7 @@ usersettings = open("data.json", "r")
 
 jsettings = json.load(usersettings)
 
-
 # Creat the Jshell Object to store data about the perons shell
 jsh = jshell()
-
 
 main()
