@@ -14,6 +14,7 @@ class jshell:
         self.directory = ""
         self.userkey = jsettings['UserString']
         self.output = ""
+        self.key = ""
         
 class ANSI():
     def background(code):
