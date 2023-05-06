@@ -6,7 +6,7 @@ import json
 from datetime import date
 from datetime import datetime
 
-
+# Information about jshell, system and user settings
 class jshell:
     key = ">" # Key to start a command
     def __init__(self):
@@ -15,7 +15,8 @@ class jshell:
         self.userkey = jsettings['UserString']
         self.output = ""
         self.key = ""
-        
+
+# Define the color codes of the outputs     
 class ANSI():
     def background(code):
         return "\33[{code}m".format(code=code)
@@ -24,15 +25,21 @@ class ANSI():
     def color_text(code):
         return "\33[{code}m".format(code=code)
 
+''' Output Functions '''
+# Printing the standard error output messages
 def print_err(err):
     print(jsh.userkey + "jsh error: " + err)
 
+# Most standard output message, with the 'UserString' defined in data.json
 def jmsg(msg):
     print(jsh.userkey + "jsh: " + str(msg))
 
+# Most standard output message, without the 'jsh:' prepended
 def jout(msg):
     print(jsh.userkey + str(msg))
 
+''' Utilities '''
+# Utility to remove a directory specified
 def rm_dir(rm_directory):
     try:
         os.rmdir(rm_directory)
@@ -42,6 +49,7 @@ def rm_dir(rm_directory):
     except:
         print_err("can't remove directory: " + rm_directory)
 
+''' Main Loop for the user commands'''
 def commands(input):
 
     # Replace any variables
@@ -207,6 +215,7 @@ def commands(input):
     else:
         print_err("command not found: " + input)
 
+''' Main '''
 def main():
     os.system("clear")
     jsh.directory = os.path.abspath(os.curdir)
@@ -214,9 +223,10 @@ def main():
         print("$ ", end="")
         commands(input())
 
+# Define the data structure settings for the shell
 usersettings = open("data.json", "r")
-
 jsettings = json.load(usersettings)
+
 
 # Creat the Jshell Object to store data about the perons shell
 jsh = jshell()
