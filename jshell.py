@@ -1,3 +1,11 @@
+#############################
+#    jshell                 #
+# light weight macOS shell  #
+#  in the style of bash     #
+#############################
+
+
+# Imports
 import sys
 import re
 import os
@@ -6,6 +14,7 @@ import json
 from datetime import date
 from datetime import datetime
 
+''' Jshell Classes '''
 # Information about jshell, system and user settings
 class jshell:
     key = ">" # Key to start a command
@@ -117,6 +126,12 @@ def commands(input):
     elif input == "help":
         jmsg("commands: about, help, pwd, ls, cd, date, time, del, exit, mk, mkdir, make, rm, rmdir, echo")
 
+    # KEY lets a user define which symbol appears before their command
+    elif (re.match("key (.*)", input)):
+        key = jsh.directory = input[2:]
+        if (len(key) > 0)
+            jmsg("You're setting your key to: " + key)
+
     # LIST FILES ls
     elif (re.match("ls (.*)", input) or input == "ls"):
         human_readable = False
@@ -223,6 +238,7 @@ def main():
         print("$ ", end="")
         commands(input())
 
+''' Start Up '''
 # Define the data structure settings for the shell
 usersettings = open("data.json", "r")
 jsettings = json.load(usersettings)
@@ -230,5 +246,4 @@ jsettings = json.load(usersettings)
 
 # Creat the Jshell Object to store data about the perons shell
 jsh = jshell()
-
 main()
