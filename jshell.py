@@ -23,7 +23,7 @@ class jshell:
         self.directory = ""
         self.userkey = jsettings['UserString']
         self.output = ""
-        self.key = ""
+        self.key = "$"
 
 # Define the color codes of the outputs     
 class ANSI():
@@ -59,47 +59,47 @@ def rm_dir(rm_directory):
         print_err("can't remove directory: " + rm_directory)
 
 ''' Main Loop for the user commands'''
-def commands(input):
+def commands(user_input):
 
     # Replace any variables
     # Relace $output with the output of the last command
-    if re.match("^(.*?)output", input):
-        output_index = input.index("output")
-        new_str = input[:output_index] + str(jsh.output) + input[output_index + 6:]
-        input = new_str
+    if re.match("^(.*?)output", user_input):
+        output_index = user_input.index("output")
+        new_str = user_input[:output_index] + str(jsh.output) + user_input[output_index + 6:]
+        user_input = new_str
     
-    # Start checking input for commands
+    # Start checking user_input for commands
     # ABOUT about
-    if input == "about":
+    if user_input == "about":
         jmsg("jshell version " + jsh.version)
     
     # CHANGE jsh.directory cd
-    elif (re.match("cd (.*)", input)):
-        if input == "cd ..":
+    elif (re.match("cd (.*)", user_input)):
+        if user_input == "cd ..":
             os.chdir("..")
             jsh.directory = os.path.abspath(os.curdir)
             jmsg("Moved up to: " + jsh.directory)
         else:
-            jsh.directory = input[3:]
+            jsh.directory = user_input[3:]
             try:
                 os.chdir(jsh.directory)
             except FileNotFoundError:
                 print_err("not a valid directory: " + jsh.directory)
             except:
-                print_err("Unkown: " + jsh.directory)
+                print_err("unknown error: " + jsh.directory)
         
     # ECHO DATE date    
-    elif input == "date":
+    elif user_input == "date":
         today = date.today()
         jsh.output = today
         jmsg(today)
 
     # DELETE del
-    elif (re.match("del (.*)", input) or re.match("rm (.*)", input)):
-        if re.match("del (.*)", input):
-            remove_file = input[4:]
+    elif (re.match("del (.*)", user_input) or re.match("rm (.*)", user_input)):
+        if re.match("del (.*)", user_input):
+            remove_file = user_input[4:]
         else:
-            remove_file = input[3:]
+            remove_file = user_input[3:]
         jmsg("deleting file" + remove_file)
         try:
             os.remove(remove_file)
@@ -110,32 +110,39 @@ def commands(input):
         except PermissionError:
             print_err("permission denied: " + remove_file)
         except:
-            print_err("Unkown: " + remove_file)
+            print_err("unknown error: " + remove_file)
 
     # ECHO echo
-    elif (re.match("echo (.*)", input)):
-        echo = input[5:]
+    elif (re.match("echo (.*)", user_input)):
+        echo = user_input[5:]
         jsh.ouput = echo
         print(echo)
 
     # EXIT exit
-    elif input == "exit":
+    elif user_input == "exit":
         sys.exit()
     
     # HELP help
-    elif input == "help":
+    elif user_input == "help":
         jmsg("commands: about, help, pwd, ls, cd, date, time, del, exit, mk, mkdir, make, rm, rmdir, echo")
 
     # KEY lets a user define which symbol appears before their command
-    elif (re.match("key (.*)", input)):
-        key = jsh.directory = input[2:]
-        if (len(key) > 0):
-            jmsg("You're setting your key to: " + key)
+    elif (re.match("key(.*)", user_input)):
+        key = jsh.directory = user_input[4:]
+        if (len(key) <= 0):
+            key_str = input("Please enter the key you would like to set: ")
+            
+        # Set the key
+        jsettings["UserKey"] = key_str
+        jmsg("Key set to: " + jsettings["UserKey"])
+        
+        
+
 
     # LIST FILES ls
-    elif (re.match("ls (.*)", input) or input == "ls"):
+    elif (re.match("ls (.*)", user_input) or user_input == "ls"):
         human_readable = False
-        if (re.match("ls -l(.*)", input)):
+        if (re.match("ls -l(.*)", user_input)):
             human_readable = True
 
         dir_list = os.listdir(os.getcwd()) 
@@ -186,33 +193,33 @@ def commands(input):
                 print("r:" + mask + "m:" + file_modifed + "f:" + jsh.directory)
 
     # MAKE FILE make or mk
-    elif (re.match("make (.*)", input) or re.match("mk (.*)", input)):
+    elif (re.match("make (.*)", user_input) or re.match("mk (.*)", user_input)):
         try:
-            new_file = input[5:]
+            new_file = user_input[5:]
             open(new_file, 'w').close() 
             jmsg("made file: " + new_file)
         except:
             print_err("can't make file: " + new_file) 
 
     # MAKE jsh.directory mkdir or mkd
-    elif (re.match("mkdir (.*)", input) or re.match("mkd (.*)", input)):
+    elif (re.match("mkdir (.*)", user_input) or re.match("mkd (.*)", user_input)):
         try:
-            jsh.directory = input[6:]
+            jsh.directory = user_input[6:]
             os.mkdir(jsh.directory)
         except:
             print_err("can't make jsh.directory: " + jsh.directory)
 
     # OUTPUT output or out
-    elif input == "output" or input == "out":
+    elif user_input == "output" or user_input == "out":
         print(jsh.output)
 
     # PRINT WORKING jsh.directory pwd
-    elif input == "pwd":
+    elif user_input == "pwd":
         jsh.ouput = jsh.directory
         jmsg(jsh.directory)
 
-    elif re.match("perm (.*)", input):
-        file_to_read = input[5:]
+    elif re.match("perm (.*)", user_input):
+        file_to_read = user_input[5:]
         st = os.stat(file_to_read)
         oct_perm = oct(st.st_mode)
         mask = oct(os.stat(file_to_read).st_mode)[-3:]
@@ -220,7 +227,7 @@ def commands(input):
         print(oct_perm)
     
     # ECHO TIME time
-    elif input == "time":
+    elif user_input == "time":
         now = datetime.now()
         current_time = now.strftime("%H:%M:%S")
         jsh.output = current_time
@@ -228,14 +235,14 @@ def commands(input):
 
     # UNKOWN COMMAND
     else:
-        print_err("command not found: " + input)
+        print_err("command not found: " + user_input)
 
 ''' Main '''
 def main():
     os.system("clear")
     jsh.directory = os.path.abspath(os.curdir)
     while True:
-        print("$ ", end="")
+        print(jsh.key + " ", end="")
         commands(input())
 
 ''' Start Up '''
