@@ -129,7 +129,7 @@ def commands(input):
     # KEY lets a user define which symbol appears before their command
     elif (re.match("key (.*)", input)):
         key = jsh.directory = input[2:]
-        if (len(key) > 0)
+        if (len(key) > 0):
             jmsg("You're setting your key to: " + key)
 
     # LIST FILES ls
