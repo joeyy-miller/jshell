@@ -128,13 +128,13 @@ def commands(user_input):
 
     # KEY lets a user define which symbol appears before their command
     elif (re.match("key(.*)", user_input)):
-        key = jsh.directory = user_input[4:]
-        if (len(key) <= 0):
-            key_str = input("Please enter the key you would like to set: ")
+        set_key = jsh.directory = user_input[4:]
+        if (len(set_key) <= 0):
+            set_key = input("Please enter the key you would like to set: ")
             
         # Set the key
-        jsettings["UserKey"] = key_str
-        jmsg("Key set to: " + jsettings["UserKey"])
+        jsh.key = set_key
+        jmsg("Key set to: " + jsh.key)
         
         
 
