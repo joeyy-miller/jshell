@@ -233,9 +233,14 @@ def commands(user_input):
         jsh.output = current_time
         jmsg("Current Time: " + current_time)
 
+    # ERRORS
+    # NO INPUT
+    elif user_input == "":
+        print_err("no input.")
+
     # UNKOWN COMMAND
     else:
-        print_err("command not found: " + user_input)
+        print_err("command not found: '" + user_input + "'.")
 
 ''' Main '''
 def main():
