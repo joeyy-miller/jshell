@@ -87,6 +87,11 @@ def commands(user_input):
                 print_err("not a valid directory: " + jsh.directory)
             except:
                 print_err("unknown error: " + jsh.directory)
+
+    # CLEAR clear the screen
+    elif user_input == "clear" or user_input == "cls":
+        clear = lambda: os.system('clear')
+        clear()
         
     # ECHO DATE date    
     elif user_input == "date":
@@ -124,7 +129,7 @@ def commands(user_input):
     
     # HELP help
     elif user_input == "help":
-        jmsg("commands: about, help, pwd, ls, cd, date, time, del, exit, mk, mkdir, make, rm, rmdir, echo")
+        jmsg("commands: about, help, pwd, ls, cd, date, time, del, exit, mk, mkdir, make, rm, rmdir, echo, clear")
 
     # KEY lets a user define which symbol appears before their command
     elif (re.match("key(.*)", user_input)):
