@@ -146,9 +146,17 @@ def commands(user_input):
 
     # LIST FILES ls
     elif (re.match("ls (.*)", user_input) or user_input == "ls"):
+        LOOP = 0 # Used to not add spacing to the first loop in the long flag list.
+        # Check flags
         human_readable = False
-        if (re.match("ls -l(.*)", user_input)):
-            human_readable = True
+        COLOR_OPTION = True
+
+        # Check long mode
+        if (re.match("ls -(.*)l(.*)", user_input)):
+            human_readable = True #-l flag is true, make long
+        # Check color mode
+        if (re.match("ls -(.*)c(.*)", user_input)):
+            COLOR_OPTION = False #-l flag is true, make long
 
         dir_list = os.listdir(os.getcwd()) 
         # prints all files
@@ -167,9 +175,18 @@ def commands(user_input):
                     count = 0
                 isFile = os.path.isfile(jsh.directory)
                 if isFile:
-                    print(ANSI.color_text(35) + jsh.directory + ANSI.color_text(0), end=" ")
+                    if COLOR_OPTION:
+                        # Print in color
+                        print(ANSI.color_text(35) + jsh.directory + ANSI.color_text(0), end=" ")
+                    else:
+                        # Print without color
+                        print(jsh.directory, end=" ")
                 else:
-                    print(ANSI.color_text(34) + jsh.directory + ANSI.color_text(0), end=" ")
+                    if COLOR_OPTION:
+                        print(ANSI.color_text(34) + jsh.directory + ANSI.color_text(0), end=" ")
+                    else:
+                        # Print without color
+                        print(jsh.directory, end=" ")
                 # print(jsh.directory + "  ", end=" ")
                 for i in range(max_length - len(jsh.directory)):
                     print(" ", end="")
@@ -179,9 +196,11 @@ def commands(user_input):
             max_length = -1;
             count = 0
             for jsh.directory in dir_list:
-                if len(jsh.directory) > max_length:
-                    max_length = len(jsh.directory)
-                print(" ", end="")
+                if (LOOP == 0):
+                    if len(jsh.directory) > max_length:
+                        max_length = len(jsh.directory)
+                    print(" ", end="")
+                LOOP += 1
 
             for jsh.directory in dir_list:
                 # Give us the current file
@@ -194,8 +213,17 @@ def commands(user_input):
                 st = os.stat(file_to_read)
                 oct_perm = oct(st.st_mode)
                 mask = oct(os.stat(file_to_read).st_mode)[-3:] # convert the permissions 
+                isFile = os.path.isfile(jsh.directory)
 
-                print("r:" + mask + "m:" + file_modifed + "f:" + jsh.directory)
+                if COLOR_OPTION:
+                    # Print in color
+                    if isFile:
+                        print("r: " + mask + " m: " + file_modifed + " f: " + ANSI.color_text(35) + jsh.directory + ANSI.color_text(0))
+                    else:
+                        print("r: " + mask + " m: " + file_modifed + " f: " + ANSI.color_text(34) + jsh.directory + ANSI.color_text(0))
+                else:
+                    # Print with no color.
+                    print("r:" + mask + " m:" + file_modifed + " f:" + jsh.directory)
 
     # MAKE FILE make or mk
     elif (re.match("make (.*)", user_input) or re.match("mk (.*)", user_input)):
@@ -205,6 +233,21 @@ def commands(user_input):
             jmsg("made file: " + new_file)
         except:
             print_err("can't make file: " + new_file) 
+
+    # COMMAND MANUAL man
+    elif (re.match("man(.*)", user_input)):
+        if user_input == "man ls":
+            jmsg("ls: command to list files.")
+            jmsg("  This command allows you to list all the files in a folder.")
+            jmsg("  Colors: Files show up as PURPLE in color. Folders are BLUE in color.")
+            jmsg("  flags:")
+            jmsg("  -l This is the 'long' command flag, it shows you the date created, along with the permissions.")
+            jmsg("  -h This is the 'human readbale' flag, it makes it easier to understand file permissions, etc.")
+            jmsg("  -c This is the 'colorless' flag, prints the file and folder names wihtout color.")
+
+        elif user_input == "man":
+            jmsg("man error: Manual for commands. Enter a command after 'man' to read its manual.")
+            jmsg("  Supported commands: ls")
 
     # MAKE jsh.directory mkdir or mkd
     elif (re.match("mkdir (.*)", user_input) or re.match("mkd (.*)", user_input)):
@@ -264,3 +307,9 @@ jsettings = json.load(usersettings)
 # Creat the Jshell Object to store data about the perons shell
 jsh = jshell()
 main()
+
+# TODO:
+# Add -a to LS to show the hidden files (currently it always shows the hidden files)
+# Fix the extra space at the begining of the -l flag in ls.
+# Add more commands to the manual command.
+# Add a way to peak in and see the first couple lines of a file aka peak command
