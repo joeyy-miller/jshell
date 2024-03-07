@@ -187,6 +187,7 @@ def commands(user_input):
         # Check flags
         human_readable = False
         COLOR_OPTION = True
+        SHOW_HIDDEN_FILES = False
 
         # Check long mode
         if (re.match("ls -(.*)l(.*)", user_input)):
@@ -194,38 +195,45 @@ def commands(user_input):
         # Check color mode
         if (re.match("ls -(.*)c(.*)", user_input)):
             COLOR_OPTION = False #-l flag is true, make long
+        if (re.match("ls -(.*)a(.*)", user_input) or re.match("ls -(.*).(.*)", user_input)):
+            SHOW_HIDDEN_FILES = True #-a or h flag is true, show hidden files
+
 
         dir_list = os.listdir(os.getcwd()) 
         # prints all files
         if not human_readable:
-            max_length = -1;
-            for jsh.directory in dir_list:
-                if len(jsh.directory) > max_length:
-                    max_length = len(jsh.directory)
-            
-            line_len = 70 # Max items per line
-            count = 0 # Count the number of items printed
-            for jsh.directory in dir_list:
-                count += len(jsh.directory)
+            max_length = -1
+            for directory in dir_list:
+                if not SHOW_HIDDEN_FILES and directory.startswith('.'):
+                    continue  # Skip hidden files if SHOW_HIDDEN_FILES is False
+            if len(directory) > max_length:
+                max_length = len(directory)
+
+            line_len = 70  # Max items per line
+            count = 0  # Count the number of items printed
+            for directory in dir_list:
+                if not SHOW_HIDDEN_FILES and directory.startswith('.'):
+                    continue  # Skip hidden files if SHOW_HIDDEN_FILES is False
+                count += len(directory)
                 if count >= line_len:
                     print(" ")
                     count = 0
-                isFile = os.path.isfile(jsh.directory)
+                isFile = os.path.isfile(directory)
                 if isFile:
                     if COLOR_OPTION:
                         # Print in color
-                        print(ANSI.color_text(35) + jsh.directory + ANSI.color_text(0), end=" ")
+                        print(ANSI.color_text(35) + directory + ANSI.color_text(0), end=" ")
                     else:
                         # Print without color
-                        print(jsh.directory, end=" ")
+                        print(directory, end=" ")
                 else:
                     if COLOR_OPTION:
-                        print(ANSI.color_text(34) + jsh.directory + ANSI.color_text(0), end=" ")
+                        print(ANSI.color_text(34) + directory + ANSI.color_text(0), end=" ")
                     else:
                         # Print without color
-                        print(jsh.directory, end=" ")
-                # print(jsh.directory + "  ", end=" ")
-                for i in range(max_length - len(jsh.directory)):
+                        print(directory, end=" ")
+                # Adjust spacing
+                for i in range(max_length - len(directory)):
                     print(" ", end="")
                     count += 1
             print(" ")
@@ -282,9 +290,11 @@ def commands(user_input):
             jmsg("  This command allows you to list all the files in a folder.")
             jmsg("  Colors: Files show up as PURPLE in color. Folders are BLUE in color.")
             jmsg("  flags:")
-            jmsg("  | -l | This is the 'long' command flag, it shows you the date created, along with the permissions.")
-            jmsg("  | -h | This is the 'human readbale' flag, it makes it easier to understand file permissions, etc.")
+            jmsg("  | -l | This is the 'long' command flag, it shows you the date created, along with the permissions, and hidden files.")
+            #jmsg("  | -h | This is the 'human readbale' flag, it makes it easier to understand file permissions, etc.") NOT IMPLEMENTED
             jmsg("  | -c | This is the 'colorless' flag, prints the file and folder names wihtout color.")
+            jmsg("  | -a | This is the 'all' flag, it shows all files, including hidden files.")
+            jmsg("  | -. | Alias for the 'all' flag, same as typing -a.")
 
         # PERM Manual
         if user_input == "man perm":
