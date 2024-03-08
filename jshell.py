@@ -19,7 +19,7 @@ from datetime import datetime
 class jshell:
     key = ">" # Key to start a command
     def __init__(self):
-        self.version = "0240311c" # Example: 0230417e -> 023 (2023) 04 (April) 17 (17th) e (5th version of the day)
+        self.version = "0240311d" # Example: 0230417e -> 023 (2023) 04 (April) 17 (17th) e (5th version of the day)
         self.directory = ""
         self.userkey = jsettings['UserString']
         self.output = ""
@@ -63,16 +63,20 @@ def commands(user_input):
 
     # Replace any variables
     # Relace $output with the output of the last command
-    if re.match("^(.*?)output", user_input):
-        output_index = user_input.index("output")
+    if re.match("^(.*?)$output", user_input):
+        output_index = user_input.index("$output")
         new_str = user_input[:output_index] + str(jsh.output) + user_input[output_index + 6:]
         user_input = new_str
     
-    # Start checking user_input for commands
+    ## START COMMAND LIST ##
+    # This is where we start checking user_input for commands
+    ## A ##
     # ABOUT about prints the version of jshell
     if user_input == "about":
         jmsg("jshell version " + jsh.version)
-
+    
+    ## B ##
+    ## C ##
     # Cat command: cat
     elif (re.match("cat (.*)", user_input)):
         file_to_read = user_input[4:]
@@ -105,13 +109,8 @@ def commands(user_input):
     elif user_input == "clear" or user_input == "cls":
         clear = lambda: os.system('clear')
         clear()
-        
-    # ECHO DATE date    
-    elif user_input == "date":
-        today = date.today()
-        jsh.output = today
-        jmsg(today)
-
+    
+    ## D ##
     # DELETE del
     elif (re.match("del (.*)", user_input) or re.match("rm (.*)", user_input)):
         if re.match("del (.*)", user_input):
@@ -130,6 +129,13 @@ def commands(user_input):
         except:
             print_err("unknown error: " + remove_file)
 
+    ## E ##
+    # ECHO DATE date    
+    elif user_input == "date":
+        today = date.today()
+        jsh.output = today
+        jmsg(today)
+
     # ECHO echo
     elif (re.match("echo (.*)", user_input)):
         echo = user_input[5:]
@@ -139,10 +145,18 @@ def commands(user_input):
     # EXIT exit
     elif user_input == "exit":
         sys.exit()
-    
+
+    ## F ##
+        
+    ## G ##
+        
+    ## H ##
     # HELP help
     elif user_input == "help":
         jmsg("commands: about, help, pwd, ls, cd, date, time, del, exit, mk, mkdir, make, rm, rmdir, echo, clear")
+        jmsg("use: man [command] for more information on a command.")
+        jmsg("use $output to use the output of the last command in your current command.")
+        jmsg("type 'exit' to exit jshell.")
 
     # KEY lets a user define which symbol appears before their command
     elif (re.match("key(.*)", user_input)):
@@ -154,8 +168,10 @@ def commands(user_input):
         jsh.key = set_key
         jmsg("Key set to: " + jsh.key)
         
-        
-
+    ## I ##
+    ## J ##
+    ## K ##
+    ## L ##
 
     # LIST FILES ls
     elif (re.match("ls (.*)", user_input) or user_input == "ls"):
@@ -238,6 +254,8 @@ def commands(user_input):
                     # Print with no color.
                     print("r:" + mask + " m:" + file_modifed + " f:" + jsh.directory)
 
+    ## M ##
+                    
     # MAKE FILE make or mk
     elif (re.match("make (.*)", user_input) or re.match("mk (.*)", user_input)):
         try:
@@ -285,10 +303,14 @@ def commands(user_input):
         except:
             print_err("can't make jsh.directory: " + jsh.directory)
 
+    ## N ##
+    ## O ##
+            
     # OUTPUT output or out
     elif user_input == "output" or user_input == "out":
         print(jsh.output)
 
+    ## P ##
     # PRINT WORKING jsh.directory pwd
     elif user_input == "pwd":
         jsh.ouput = jsh.directory
@@ -302,12 +324,25 @@ def commands(user_input):
         print(mask)
         print(oct_perm)
     
-    # ECHO TIME time
+    ## Q ##
+    ## R ##
+    ## S ##
+    ## T ##
+        
+    # TIME Echos the current time to the terminal
     elif user_input == "time":
         now = datetime.now()
         current_time = now.strftime("%H:%M:%S")
         jsh.output = current_time
         jmsg("Current Time: " + current_time)
+
+    ## U ##
+    ## V ##
+    ## W ##
+    ## X ##
+    ## Y ##
+    ## Z ##
+        
 
     # ERRORS
     # NO INPUT
@@ -317,6 +352,8 @@ def commands(user_input):
     # UNKOWN COMMAND
     else:
         print_err("command not found: '" + user_input + "'.")
+
+    ## END COMMAND LIST ##
 
 ''' Main '''
 def main():
