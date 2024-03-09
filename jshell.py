@@ -19,7 +19,7 @@ from datetime import datetime
 class jshell:
     key = ">" # Key to start a command
     def __init__(self):
-        self.version = "0230417e"
+        self.version = "0240311c" # Example: 0230417e -> 023 (2023) 04 (April) 17 (17th) e (5th version of the day)
         self.directory = ""
         self.userkey = jsettings['UserString']
         self.output = ""
@@ -69,11 +69,24 @@ def commands(user_input):
         user_input = new_str
     
     # Start checking user_input for commands
-    # ABOUT about
+    # ABOUT about prints the version of jshell
     if user_input == "about":
         jmsg("jshell version " + jsh.version)
+
+    # Cat command: cat
+    elif (re.match("cat (.*)", user_input)):
+        file_to_read = user_input[4:]
+        try:
+            with open(file_to_read, 'r') as file:
+                jout(file.read())
+        except FileNotFoundError:
+            print_err("not a valid file: " + file_to_read)
+        except:
+            print_err("unknown error: " + file_to_read)
+    elif user_input == "cat":
+        jmsg("cat error: Please enter a file to print the contents of.")
     
-    # CHANGE jsh.directory cd
+    # (Change Directory) command: cd
     elif (re.match("cd (.*)", user_input)):
         if user_input == "cd ..":
             os.chdir("..")
@@ -88,7 +101,7 @@ def commands(user_input):
             except:
                 print_err("unknown error: " + jsh.directory)
 
-    # CLEAR clear the screen
+    # CLEAR (Clear the terminal screen)
     elif user_input == "clear" or user_input == "cls":
         clear = lambda: os.system('clear')
         clear()
