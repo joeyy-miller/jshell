@@ -282,9 +282,20 @@ def commands(user_input):
             jmsg("  This command allows you to list all the files in a folder.")
             jmsg("  Colors: Files show up as PURPLE in color. Folders are BLUE in color.")
             jmsg("  flags:")
-            jmsg("  -l This is the 'long' command flag, it shows you the date created, along with the permissions.")
-            jmsg("  -h This is the 'human readbale' flag, it makes it easier to understand file permissions, etc.")
-            jmsg("  -c This is the 'colorless' flag, prints the file and folder names wihtout color.")
+            jmsg("  | -l | This is the 'long' command flag, it shows you the date created, along with the permissions.")
+            jmsg("  | -h | This is the 'human readbale' flag, it makes it easier to understand file permissions, etc.")
+            jmsg("  | -c | This is the 'colorless' flag, prints the file and folder names wihtout color.")
+
+        # PERM Manual
+        if user_input == "man perm":
+            jmsg("perm: command to change the permissions of a file.")
+            jmsg("  This command allows you to read or change the permissions of a file.")
+            jmsg("  Reading Permissions: perm [file]")
+            jsmg("  Changing Permissions: perm [file] [permissions]")
+            jmsg("  Example: perm file.txt 777")
+            jmsg("  This will set the file.txt to have full permissions.")
+            jmsg("  flags:")
+            jmsg("  | -o | Octal mode, shows the file permissions in octal.")
 
         # KEY Manual
         if user_input == "man key":
@@ -325,6 +336,12 @@ def commands(user_input):
         jmsg(jsh.directory)
 
     elif re.match("perm (.*)", user_input):
+
+        # Check octal mode
+        if (re.match("perm -(.*)o(.*)", user_input)):
+            OCTAL_MODE = True #-o flag is true, show the octal file permission
+            user_input = user_input.replace("-o", "")
+
         # Splitting the string into a list of words
         words = user_input.split()       
         # Initializing variables to None
@@ -347,8 +364,11 @@ def commands(user_input):
                 st = os.stat(file_to_read)
                 # Get permissions in octal of the file
                 oct_perm = oct(st.st_mode)
-                # Change from octal to decminal
-                mask = oct(os.stat(file_to_read).st_mode)[-3:]
+
+                if (OCTAL_MODE == False):
+                    # Don't convert from octal to decimal
+                    mask = oct(os.stat(file_to_read).st_mode)[-3:]
+
                 print(mask)
                 #print(oct_perm)
             except FileNotFoundError:
@@ -413,3 +433,8 @@ main()
 # Fix the extra space at the begining of the -l flag in ls.
 # Add more commands to the manual command.
 # Add a way to peak in and see the first couple lines of a file aka peak command
+
+# Change the way that user input works... split it up like this:
+# Have a flag array flag[1] = "-l" flag[2] = "-h" flag[3] = "-c"
+# Have a arguments array command = "ls" arguments[1] = "file.txt" arguments[2] = "777"
+# Have one variable for the command itself. command = "ls"
