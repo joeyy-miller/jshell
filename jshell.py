@@ -58,6 +58,13 @@ def rm_dir(rm_directory):
     except:
         print_err("can't remove directory: " + rm_directory)
 
+def change_file_permissions(file_path, permissions):
+    # Convert the string permissions to an octal number
+    mode = int(permissions, 8)
+    
+    # Change the file permissions
+    os.chmod(file_path, mode)
+
 ''' Main Loop for the user commands'''
 def commands(user_input):
 
@@ -154,6 +161,7 @@ def commands(user_input):
     # HELP help
     elif user_input == "help":
         jmsg("commands: about, help, pwd, ls, cd, date, time, del, exit, mk, mkdir, make, rm, rmdir, echo, clear")
+        jmsg("  man, key, output, perm")
         jmsg("use: man [command] for more information on a command.")
         jmsg("use $output to use the output of the last command in your current command.")
         jmsg("type 'exit' to exit jshell.")
@@ -317,12 +325,39 @@ def commands(user_input):
         jmsg(jsh.directory)
 
     elif re.match("perm (.*)", user_input):
-        file_to_read = user_input[5:]
-        st = os.stat(file_to_read)
-        oct_perm = oct(st.st_mode)
-        mask = oct(os.stat(file_to_read).st_mode)[-3:]
-        print(mask)
-        print(oct_perm)
+        # Splitting the string into a list of words
+        words = user_input.split()       
+        # Initializing variables to None
+        word1 = word2 = word3 = None        
+
+        # Assigning each word to a separate variable based on the number of words present
+        if len(words) >= 1:
+            word1 = words[0]
+        if len(words) >= 2:
+            word2 = words[1]
+        if len(words) == 3:
+            word3 = words[2]
+
+        file_to_read = word2
+
+        if (word3 == None):
+            # User is using the perm command to *output* the file permissions
+            try:
+                # Get the stat information on the file
+                st = os.stat(file_to_read)
+                # Get permissions in octal of the file
+                oct_perm = oct(st.st_mode)
+                # Change from octal to decminal
+                mask = oct(os.stat(file_to_read).st_mode)[-3:]
+                print(mask)
+                #print(oct_perm)
+            except FileNotFoundError:
+                print_err("not a valid file: " + file_to_read)
+        else:
+            # User is using the perm command to *change* the file permissions
+            permissions = word3
+            change_file_permissions(file_to_read, permissions)
+            
     
     ## Q ##
     ## R ##
