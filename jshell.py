@@ -236,6 +236,8 @@ def commands(user_input):
 
     # COMMAND MANUAL man
     elif (re.match("man(.*)", user_input)):
+
+        # LS Manual
         if user_input == "man ls":
             jmsg("ls: command to list files.")
             jmsg("  This command allows you to list all the files in a folder.")
@@ -245,6 +247,19 @@ def commands(user_input):
             jmsg("  -h This is the 'human readbale' flag, it makes it easier to understand file permissions, etc.")
             jmsg("  -c This is the 'colorless' flag, prints the file and folder names wihtout color.")
 
+        # KEY Manual
+        if user_input == "man key":
+            jmsg("key: command to set the key before the command.")
+            jmsg("  This command allows you to set the key before the command.")
+            jmsg("  Example: key >")
+            jmsg("  This will set the key to '>'.")
+            jmsg("  The key is the symbol that appears before the command.")
+            jmsg("  The default key is '$'.")
+            jmsg("  The key is used to show the user that the shell is ready for a command.")
+            jmsg("  flags:")
+            jmsg("   none")            
+
+        # User did not specify which command to get a manaul for
         elif user_input == "man":
             jmsg("man error: Manual for commands. Enter a command after 'man' to read its manual.")
             jmsg("  Supported commands: ls")
