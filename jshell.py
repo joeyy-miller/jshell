@@ -19,37 +19,79 @@ from datetime import datetime
 class jshell:
     key = ">" # Key to start a command
     def __init__(self):
-        self.version = "0240311d" # Example: 0230417e -> 023 (2023) 04 (April) 17 (17th) e (5th version of the day)
-        self.directory = ""
+        self.build = "0240314e" # Example: 0230417e -> 023 (2023) 04 (April) 17 (17th) e (5th build of the day)
+        self.version = "0.5.1" # Main version number
+        self.release = "beta" # Alpha, Beta, Release
+        self.directory = "" # Stores the current directory the terminal is modifying
         self.userkey = jsettings['UserString']
-        self.output = ""
-        self.key = "$"
+        self.output = "" # Stores the output of the last command
+        self.key = "$" # The key that appears before the command
         self.debug = False # Debug mode
+        self.color = True # Color mode
+        self.MAX_OUTOUT_LENGTH = 150 # The maximum length of the output of a command
+        self.variables = {} # A dictionary to store variables
+
+class Variable:
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
+        self.type = self.determine_type()
+
+    def determine_type(self):
+        if isinstance(self.value, str):
+            return 'string'
+        elif isinstance(self.value, (int, float)):
+            return 'number'
+        else:
+            return 'unknown'
+    
+    def __str__(self):
+        return f"{self.value}"
 
 # Define the color codes of the outputs     
 class ANSI():
     def background(code):
-        return "\33[{code}m".format(code=code)
+        return "\33[{code}m".format(code=code) # Background color
     def style_text(code):
-        return "\33[{code}m".format(code=code)
+        return "\33[{code}m".format(code=code) # Style of the text
     def color_text(code):
-        return "\33[{code}m".format(code=code)
+        return "\33[{code}m".format(code=code) # Color of the text
+    
+# Color Codes
+PURPLE = 35
+BLUE = 34
 
 ''' Output Functions '''
 # Printing the standard error output messages
 def jerror(err):
-    print(jsh.userkey + "jsh error: " + err)
+    err = str(err)
+    while len(err) > 0:
+        if (len(err) > jsh.MAX_OUTOUT_LENGTH):
+            print(jsh.userkey + "jsh error: " + err[:jsh.MAX_OUTOUT_LENGTH] + "...") # We know we are going to print another line below this one, so add elipses
+        else:
+            print(jsh.userkey + "jsh error: " + err) # not going to print an addtional line.
+        err = err[jsh.MAX_OUTOUT_LENGTH:] # Remove the first 100 characters from the string that we just printed
 
 # Most standard output message, with the 'UserString' defined in data.json
 def jmsg(msg):
-    print(jsh.userkey + "jsh: " + str(msg))
+    msg = str(msg)
+    while len(msg) > 0:
+        if (len(msg) > jsh.MAX_OUTOUT_LENGTH):
+            print(jsh.userkey + "jsh: " + msg[:jsh.MAX_OUTOUT_LENGTH] + "...") 
+        else:
+            print(jsh.userkey + "jsh: " + msg) 
+        msg = msg[jsh.MAX_OUTOUT_LENGTH:] 
 
 # Most standard output message, without the 'jsh:' prepended
 def jout(msg):
-    print(jsh.userkey + str(msg))
+    msg = str(msg)
+    while len(msg) > 0:
+        if (len(msg) > jsh.MAX_OUTOUT_LENGTH):
+            print(msg[:jsh.MAX_OUTOUT_LENGTH] + "...") # We know we are going to print another line below this one, so add elipses
+        else:
+            print(msg) # not going to print an addtional line.
+        msg = msg[jsh.MAX_OUTOUT_LENGTH:] # Remove the first 100 characters from the string that we just printed
 
-def msg(message):
-    print(str(message))
 
 ''' Utilities '''
 # Utility to remove a directory specified
@@ -69,58 +111,112 @@ def change_file_permissions(file_path, permissions):
     # Change the file permissions
     os.chmod(file_path, mode)
 
+def process_input(user_input, variables):
+    """
+    Process variable redefinitions in user_input, updating or adding to the variables structure.
+    Replace variable uses in the text with their values, excluding redefinitions.
+
+    :param user_input: String potentially containing variable redefinitions and uses.
+    :param variables: Dictionary mapping variable names to their Variable instances.
+    :return: Modified user_input with variable uses replaced by their values.
+    """
+    # Regex patterns for variable definition and usage
+    definition_pattern = r'\$(\w+)\s*=\s*"([^"]*)"|\$(\w+)\s*=\s*(\d+(?:\.\d+)?)'
+    usage_pattern = r'\$(\w+)'
+
+    # Update variables with any definitions found
+    for match in re.finditer(definition_pattern, user_input):
+        name, string_value, number_name, number_value = match.groups()
+        if name:  # String variable
+            variables[name] = Variable(name, string_value)
+        elif number_name:  # Number variable
+            number_value = float(number_value) if '.' in number_value else int(number_value)
+            variables[number_name] = Variable(number_name, number_value)
+
+    # Function to replace matches with their values
+    def replace_function(match):
+        variable_name = match.group(1)
+        if variable_name in variables:
+            return str(variables[variable_name])
+        return match.group(0)  # Return the original string if no variable found
+
+    # Replace variable uses in the input
+    modified_input = re.sub(usage_pattern, replace_function, user_input)
+
+    return modified_input
+
+
+
 ''' Main Loop for the user commands'''
 def commands(user_input):
 
     ''' First Replace Any Variables in User Input '''
-    # Replace any variables
+    # Replace stock variable, $output, with the output of the last command
     # Relace $output with the output of the last command
-
     if (jsh.output != ""):
-        user_input = user_input.replace("$output", str(jsh.output))
+        ser_input = user_input.replace("$output", str(jsh.output))
+
+    # Replace any other variables
+    IF_VARIABLE = False # Used in input to check if the user is creating a variable
+    user_input_old = user_input
+    user_input = process_input(user_input, jsh.variables)
+
+    if user_input != user_input_old:
+        IF_VARIABLE = True
+
+    ''' Create any new variables 
+    # Regex pattern to match variable definitions
+    # This pattern assumes variable names are alphanumeric + underscore, and values are in double quotes
+    pattern = r'\$(\w+)\s*=\s*"([^"]*)"'
+    # Find all matches in the user input
+    matches = re.findall(pattern, user_input)
+    
+    IF_VARIABLE = False # Used in input to check if the user is creating a variable
+    # Iterate over matches and assign to dictionary
+    for match in matches:
+        variable_name, variable_value = match
+        jsh.variables[variable_name] = variable_value
+        jmsg(f"Created variable '{variable_name}' with value '{variable_value}'")
+        IF_VARIABLE = True # The user created a variable
+    '''
 
     ''' Break Up User Input '''
-    
     # Split the string by spaces
     parts = user_input.split()
-
     # Initialize variables
     command = ""
     options = []
     arguments = []
-
-    # Process each part
+    # Process each option
     for part in parts:
         if part.startswith('-') and not command:  # Assuming options only come after the command
             # Extract options and remove the dash, then convert to a list for individual access
             options.extend(list(part[1:]))
         elif not command:
-            # The first non-option part is the command
+            # The first non-option option is the command
             command = part
         else:
             # Everything else is considered an argument
             arguments.append(part)
-
     '''
     For future reference:
     for option in options: 
         print(f"Option: {option}")
     '''
 
-
-    print("USER INTPUT: " + user_input)
-    
     ## START COMMAND LIST ##
     # This is where we start checking user_input for commands
     ## A ##
-    # ABOUT about prints the version of jshell
+    # ABOUT about prints the build of jshell
     if user_input == "about":
-        jmsg("jshell version " + jsh.version)
+        if jsh.debug:
+            jmsg("jshell build: " + jsh.build + " build:" + jsh.version)
+        jmsg("jshell build " + jsh.version)
     
     ## B ##
     ## C ##
     # Cat command: cat
-    elif (re.match("cat (.*)", user_input)):
+    elif command == "cat":
         file_to_read = user_input[4:]
         try:
             with open(file_to_read, 'r') as file:
@@ -133,7 +229,7 @@ def commands(user_input):
         jmsg("cat error: Please enter a file to print the contents of.")
     
     # (Change Directory) command: cd
-    elif (re.match("cd (.*)", user_input)):
+    elif command == "cd" or command == "chdir":
         if user_input == "cd ..":
             os.chdir("..")
             jsh.directory = os.path.abspath(os.curdir)
@@ -148,13 +244,22 @@ def commands(user_input):
                 jerror("unknown error: " + jsh.directory)
 
     # CLEAR (Clear the terminal screen)
-    elif user_input == "clear" or user_input == "cls":
+    elif command == "clear" or command == "cls":
         clear = lambda: os.system('clear')
         clear()
     
+    # COLOR (Toggle color mode)
+    elif command == "color":
+        if jsh.color:
+            jsh.color = False
+            jmsg("color mode off")
+        else:
+            jsh.color = True
+            jmsg("color mode on")
+    
     ## D ##
     # DEBUG debug (adds additonal infromation for debugging)
-    elif user_input == "debug":
+    elif command == "debug":
         if jsh.debug:
             jsh.debug = False
             jmsg("debug mode off")
@@ -165,7 +270,7 @@ def commands(user_input):
 
     
     # DELETE del
-    elif (re.match("del (.*)", user_input) or re.match("rm (.*)", user_input) or command == "delete"):
+    elif command == "del" or command == "rm" or command == "delete":
         if re.match("del (.*)", user_input):
             remove_file = arguments[0]
         else:
@@ -190,30 +295,29 @@ def commands(user_input):
         jmsg(today)
 
     # ECHO echo
-    elif (re.match("echo (.*)", user_input)):
+    elif command == "echo":
         echo = user_input[5:]
         jsh.ouput = echo
-        print(echo)
+        jout(echo)
 
     # EXIT exit
     elif user_input == "exit" or user_input == "quit" or user_input == "q" or user_input == "close" or user_input == "bye" or user_input == "goodbye" or user_input == "end" or user_input == "stop" or user_input == "halt" or user_input == "terminate" or user_input == "kill" or user_input == "destroy":
         sys.exit()
 
     ## F ##
-        
     ## G ##
-        
+    
     ## H ##
     # HELP help
-    elif user_input == "help":
+    elif command == "help":
         jmsg("commands: about, help, pwd, ls, cd, date, time, del, exit, mk, mkdir, make...")
-        msg("           rm, rmdir, echo, clear, man, key, output, perm, touch.")
-        jmsg("use: man [command] for more information on a command.")
-        jmsg("use $output to use the output of the last command in your current command.")
-        jmsg("type 'exit' to exit jshell.")
+        jout("           rm, rmdir, echo, clear, man, key, output, perm, touch, color.")
+        jout("use: man [command] for more information on a command. 'man jsh' for additional manual pages.")
+        jout("use $output to use the output of the last command in your current command.")
+        jout("type 'exit' to exit jshell.")
 
     # KEY lets a user define which symbol appears before their command
-    elif (re.match("key(.*)", user_input)):
+    elif command == "key":
         set_key = jsh.directory = user_input[4:]
         if (len(set_key) <= 0):
             set_key = input("Please enter the key you would like to set: ")
@@ -228,25 +332,27 @@ def commands(user_input):
     ## L ##
 
     # LIST FILES ls
-    elif (re.match("ls (.*)", user_input) or user_input == "ls"):
+    elif command == "ls" or command == "list":
         LOOP = 0 # Used to not add spacing to the first loop in the long flag list.
         # Check flags
         human_readable = False
         COLOR_OPTION = True
         SHOW_HIDDEN_FILES = False
 
-        # Check long mode
+        # Check long/list mode, display in list
         if (re.match("ls -(.*)l(.*)", user_input)):
             human_readable = True #-l flag is true, make long
-        # Check color mode
+        # Check color mode, display color
         if (re.match("ls -(.*)c(.*)", user_input)):
             COLOR_OPTION = False #-l flag is true, make long
+        # Check for all mode, show hidden files
         if (re.match("ls -(.*)a(.*)", user_input) or re.match("ls -(.*).(.*)", user_input)):
             SHOW_HIDDEN_FILES = True #-a or h flag is true, show hidden files
 
 
         dir_list = os.listdir(os.getcwd()) 
-        # prints all files
+
+        # Normal LS usage. Not with the -l flag
         if not human_readable:
             max_length = -1
             for directory in dir_list:
@@ -266,15 +372,15 @@ def commands(user_input):
                     count = 0
                 isFile = os.path.isfile(directory)
                 if isFile:
-                    if COLOR_OPTION:
+                    if COLOR_OPTION and jsh.color:
                         # Print in color
-                        print(ANSI.color_text(35) + directory + ANSI.color_text(0), end=" ")
+                        print(ANSI.color_text(BLUE) + directory + ANSI.color_text(0), end=" ")
                     else:
                         # Print without color
                         print(directory, end=" ")
-                else:
-                    if COLOR_OPTION:
-                        print(ANSI.color_text(34) + directory + ANSI.color_text(0), end=" ")
+                else: # It's a folder
+                    if COLOR_OPTION and jsh.color:
+                        print(ANSI.color_text(PURPLE) + "[" + directory + "]" + ANSI.color_text(0), end=" ")
                     else:
                         # Print without color
                         print(directory, end=" ")
@@ -283,6 +389,7 @@ def commands(user_input):
                     print(" ", end="")
                     count += 1
             print(" ")
+        # Print in long mode, with the -l flag
         else:
             max_length = -1;
             count = 0
@@ -306,7 +413,7 @@ def commands(user_input):
                 mask = oct(os.stat(file_to_read).st_mode)[-3:] # convert the permissions 
                 isFile = os.path.isfile(jsh.directory)
 
-                if COLOR_OPTION:
+                if COLOR_OPTION and jsh.color:
                     # Print in color
                     if isFile:
                         print("r: " + mask + " m: " + file_modifed + " f: " + ANSI.color_text(35) + jsh.directory + ANSI.color_text(0))
@@ -319,7 +426,7 @@ def commands(user_input):
     ## M ##
                     
     # MAKE FILE make or mk
-    elif (re.match("make (.*)", user_input) or re.match("mk (.*)", user_input)):
+    elif command == "make" or command == "mk":
         try:
             new_file = user_input[5:]
             open(new_file, 'w').close() 
@@ -327,48 +434,75 @@ def commands(user_input):
         except:
             jerror("can't make file: " + new_file) 
 
+    # MAKE DIRECTORY mkdir or mkd
+    elif (command == "mkdir" or command == "mkd" or command == "makefolder" or command == "folder" or command == "makedir"):
+        try:
+            jsh.directory = arguments[0]
+            os.mkdir(jsh.directory)
+        except FileExistsError:
+            jerror("directory already exists: " + jsh.directory)
+        except:
+            jerror("can't make jsh.directory: " + jsh.directory)
+        else:
+            jmsg("created directory: " + jsh.directory)
+        finally:
+            # Just wanted to show the use of the this keyword in Pyhton.
+            created = False
+
     # COMMAND MANUAL man
-    elif (re.match("man(.*)", user_input)):
+    elif command == "man":
 
         # LS Manual
         if user_input == "man ls":
-            msg("ls: command to list files.")
-            msg("  This command allows you to list all the files in a folder.")
-            msg("  Colors: Files show up as PURPLE in color. Folders are BLUE in color.")
-            msg("  flags:")
-            msg("  | -l | This is the 'long' command flag, it shows you the date created, along with the permissions, and hidden files.")
-            #msg("  | -h | This is the 'human readbale' flag, it makes it easier to understand file permissions, etc.") NOT IMPLEMENTED
-            msg("  | -c | This is the 'colorless' flag, prints the file and folder names wihtout color.")
-            msg("  | -a | This is the 'all' flag, it shows all files, including hidden files.")
-            msg("  | -. | Alias for the 'all' flag, same as typing -a.")
+           jout("ls: command to list files.")
+           jout("  This command allows you to list all the files in a folder.")
+           jout("  Colors: Files show up as BLUE in color. Folders are PURPLE in color, and sorounded in brackets.")
+           jout("  flags:")
+           jout("  | -l | This is the 'long' command flag, it shows you the date created, along with the permissions, and hidden files.")
+           #msg("  | -h | This is the 'human readbale' flag, it makes it easier to understand file permissions, etc.") NOT IMPLEMENTED
+           jout("  | -c | This is the 'colorless' flag, prints the file and folder names wihtout color.")
+           jout("  | -a | This is the 'all' flag, it shows all files, including hidden files.")
+           jout("  | -. | Alias for the 'all' flag, same as typing -a.")
 
         # PERM Manual
         elif user_input == "man perm":
-            msg("perm: command to change the permissions of a file.")
-            msg("  This command allows you to read or change the permissions of a file.")
-            msg("  Reading Permissions: perm [file]")
-            msg("  Changing Permissions: perm [file] [permissions]")
-            msg("  Example: perm file.txt 777")
-            msg("  This will set the file.txt to have full permissions.")
-            msg("  flags:")
-            msg("  | -o | Octal mode, shows the file permissions in octal.")
+           jout("perm: command to change the permissions of a file.")
+           jout("  This command allows you to read or change the permissions of a file.")
+           jout("  Reading Permissions: perm [file]")
+           jout("  Changing Permissions: perm [file] [permissions]")
+           jout("  Example: perm file.txt 777")
+           jout("  This will set the file.txt to have full permissions.")
+           jout("  flags:")
+           jout("  | -o | Octal mode, shows the file permissions in octal.")
 
         # KEY Manual
         elif user_input == "man key":
-            msg("key: command to set the key before the command.")
-            msg("  This command allows you to set the key before the command.")
-            msg("  Example: key >")
-            msg("  This will set the key to '>'.")
-            msg("  The key is the symbol that appears before the command.")
-            msg("  The default key is '$'.")
-            msg("  The key is used to show the user that the shell is ready for a command.")
-            msg("  flags:")
-            msg("   none")            
+           jout("key: command to set the key before the command.")
+           jout("  This command allows you to set the key before the command.")
+           jout("  Example: key >")
+           jout("  This will set the key to '>'.")
+           jout("  The key is the symbol that appears before the command.")
+           jout("  The default key is '$'.")
+           jout("  The key is used to show the user that the shell is ready for a command.")
+           jout("  flags:")
+           jout("   none")
+
+        # JShell Manual
+        elif user_input == "man jsh":
+            jout("How to use jshell:")
+            jout("Commands: about, help, pwd, ls, cd, date, time, del, exit, mk, mkdir, make, rm, rmdir, echo, clear, color, man, key, output, perm, touch.")
+            jout("Color Mode: type 'color' to turn on/off color mode. This will show the output in color.")
+            jout("Variables: You can use the $output variable to use the output of the last command that shows an output in your current command.")
+            jout("           You can also create your own variables by typing '$[variable name] = [value]'")
+            jout("           Example: $name = 'John'. Variables can be an integer or number. They cannot be assigned to eachother.")
+            jout("           See a list of made variables by typing 'variable' or 'var. Variables can be used in the same way as $output.")
+            jout("Debug Mode: type 'debug' to turn on/off debug mode. This will show additional information about the command.")
+            jout("type 'exit' to exit jshell.")
 
         # User did not specify which command to get a manaul for
-        elif user_input == "man":
+        elif command == "man":
             jmsg("man error: Manual for commands. Enter a command after 'man' to read its manual.")
-            msg("  Supported commands: ls, perm. key")
+            jout("  Supported commands: ls, perm. key")
 
     # MAKE jsh.directory mkdir or mkd
     elif (re.match("mkdir (.*)", user_input) or re.match("mkd (.*)", user_input)):
@@ -382,17 +516,18 @@ def commands(user_input):
     ## O ##
             
     # OUTPUT output or out
-    elif user_input == "output" or user_input == "out":
+    elif command == "output" or command == "out":
         print(jsh.output)
 
     ## P ##
     # PRINT WORKING jsh.directory pwd
-    elif user_input == "pwd":
+    elif command == "pwd":
         jsh.ouput = jsh.directory
         jmsg(jsh.directory)
 
-    elif re.match("perm (.*)", user_input):
+    elif command == "perm":
 
+        OCTAL_MODE = False
         # Check octal mode
         if (re.match("perm -(.*)o(.*)", user_input)):
             OCTAL_MODE = True #-o flag is true, show the octal file permission
@@ -413,7 +548,7 @@ def commands(user_input):
 
         file_to_read = word2
 
-        if (word3 == None):
+        if (word3 == None) and (word2 != None):
             # User is using the perm command to *output* the file permissions
             try:
                 # Get the stat information on the file
@@ -429,10 +564,12 @@ def commands(user_input):
                 #print(oct_perm)
             except FileNotFoundError:
                 jerror("not a valid file: " + file_to_read)
-        else:
+        elif (word3 != None) and (word2 != None):
             # User is using the perm command to *change* the file permissions
             permissions = word3
             change_file_permissions(file_to_read, permissions)
+        else:
+            jerror("perm error: Please enter a file to read or change the permissions of.")
             
     
     ## Q ##
@@ -465,10 +602,28 @@ def commands(user_input):
 
     ## U ##
     ## V ##
+    elif command == "var" or command == "variable":
+        jmsg("Variables:")
+        for var in jsh.variables.values():
+            jout(f"Name: {var.name}, Value: {var.value}, Type: {var.type}")
     ## W ##
+    elif command == "width":
+        try:
+            width = int(arguments[0])
+            jsh.MAX_OUTOUT_LENGTH = width
+        except:
+            jerror("width error: Please enter a number.")
+        jout("Width: " + str(jsh.MAX_OUTOUT_LENGTH))
+        #jout("Width: " + str(os.get_terminal_size().columns))
+        
+
     ## X ##
     ## Y ##
     ## Z ##
+            
+    elif IF_VARIABLE:
+        # If the user created a variable, let them know it was created, without causing a no input error.
+        test = 0
         
 
     # ERRORS
@@ -484,12 +639,12 @@ def commands(user_input):
         
     # If the user is in debug mode, print addtion information at the end of the command
     if jsh.debug:
-        msg(f"Command: {command}")
-        msg(f"Options: {options}")
-        msg(f"Arguments: {arguments}")
-        msg(f"User Input: {user_input}")
-        msg(f"jshell Output: {jsh.output}")
-        msg('') # extra line
+       jout(f"Command: {command}")
+       jout(f"Options: {options}")
+       jout(f"Arguments: {arguments}")
+       jout(f"User Input: {user_input}")
+       jout(f"jshell Output: {jsh.output}")
+       jout('') # extra line
 
 ''' Main '''
 def main():
