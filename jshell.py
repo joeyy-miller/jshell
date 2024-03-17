@@ -358,8 +358,10 @@ def commands(user_input):
             for directory in dir_list:
                 if not SHOW_HIDDEN_FILES and directory.startswith('.'):
                     continue  # Skip hidden files if SHOW_HIDDEN_FILES is False
-            if len(directory) > max_length:
-                max_length = len(directory)
+            
+                if len(directory) > 0:
+                    if len(directory) > max_length:
+                        max_length = len(directory)
 
             line_len = 70  # Max items per line
             count = 0  # Count the number of items printed
@@ -661,6 +663,7 @@ jsettings = json.load(usersettings)
 
 
 # Creat the Jshell Object to store data about the perons shell
+
 jsh = jshell()
 main()
 
