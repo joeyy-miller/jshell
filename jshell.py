@@ -217,14 +217,26 @@ def commands(user_input):
     ## C ##
     # Cat command: cat
     elif command == "cat":
-        file_to_read = user_input[4:]
-        try:
-            with open(file_to_read, 'r') as file:
-                jout(file.read())
-        except FileNotFoundError:
-            jerror("not a valid file: " + file_to_read)
-        except:
-            jerror("unknown error: " + file_to_read)
+        if (arguments[1] == ">>"):
+            file_to_write = arguments[0]
+            try:
+                with open(file_to_write, 'a') as file:
+                    cat_length = 3 + len(arguments[0] + arguments[1])
+                    file.write(user_input[cat_length:])
+                    jmsg("wrote to file: " + file_to_write)
+            except FileNotFoundError:
+                jerror("not a valid file: " + file_to_write)
+            except:
+                jerror("unknown error: " + file_to_write)
+        else:
+            file_to_read = user_input[4:]
+            try:
+                with open(file_to_read, 'r') as file:
+                    jout(file.read())
+            except FileNotFoundError:
+                jerror("not a valid file: " + file_to_read)
+            except:
+                jerror("unknown error: " + file_to_read)
     elif user_input == "cat":
         jmsg("cat error: Please enter a file to print the contents of.")
     
