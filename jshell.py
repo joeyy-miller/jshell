@@ -242,12 +242,12 @@ def commands(user_input):
     
     # (Change Directory) command: cd
     elif command == "cd" or command == "chdir":
-        if user_input == "cd ..":
+        if arguments[0] == "..":
             os.chdir("..")
             jsh.directory = os.path.abspath(os.curdir)
             jmsg("Moved up to: " + jsh.directory)
         else:
-            jsh.directory = user_input[3:]
+            jsh.directory = arguments[0]
             try:
                 os.chdir(jsh.directory)
             except FileNotFoundError:
