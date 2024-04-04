@@ -255,6 +255,22 @@ def commands(user_input):
             except:
                 jerror("unknown error: " + jsh.directory)
 
+    elif command == "cp" or command == "copy":
+        if re.match("cp (.*) (.*)", user_input):
+            file_to_copy = arguments[0]
+            new_file = arguments[1]
+            try:
+                with open(file_to_copy, 'r') as file:
+                    with open(new_file, 'w') as new_file:
+                        new_file.write(file.read())
+                jmsg("copied file: " + file_to_copy + " to " + new_file)
+            except FileNotFoundError:
+                jerror("not a valid file: " + file_to_copy)
+            except:
+                jerror("unknown error: " + file_to_copy)
+        else:
+            jerror("cp error: Please enter a file to copy and a new file to copy it to.")
+
     # CLEAR (Clear the terminal screen)
     elif command == "clear" or command == "cls":
         clear = lambda: os.system('clear')
