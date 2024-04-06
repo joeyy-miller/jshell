@@ -24,12 +24,41 @@ class jshell:
         self.release = "beta" # Alpha, Beta, Release
         self.directory = "" # Stores the current directory the terminal is modifying
         self.userkey = jsettings['UserString']
+        self.username = jsettings['UserName']
         self.output = "" # Stores the output of the last command
         self.key = "$" # The key that appears before the command
-        self.debug = False # Debug mode
-        self.color = True # Color mode
+        self.debug = False # Debug mode, default False
+        self.color = True # Color mode, default True
         self.MAX_OUTOUT_LENGTH = 150 # The maximum length of the output of a command
         self.variables = {} # A dictionary to store variables
+
+    def save_settings():
+        """
+        Save the user settings UserName and UserString to the data.json file.
+        """
+        file_name = 'data.json'
+        
+        # Check if the file exists
+        if os.path.exists(file_name):
+            # File exists, read it
+            with open(file_name, 'r') as file:
+                try:
+                    data = json.load(file)
+                except json.JSONDecodeError:
+                    # File is empty or corrupt; start with an empty dict
+                    data = {}
+        else:
+            # File does not exist; start with an empty dict
+            data = {}
+        
+        # Update settings
+        data['UserName'] = jsh.userkey
+        data['UserString'] = jsh.username
+        
+        # Write updated settings back to the file
+        with open(file_name, 'w') as file:
+            json.dump(data, file, indent=4)
+
 
 class Variable:
     def __init__(self, name, value):
@@ -94,6 +123,7 @@ def jout(msg):
 
 
 ''' Utilities '''
+
 # Utility to remove a directory specified
 def rm_dir(rm_directory):
     try:
