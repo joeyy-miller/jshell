@@ -384,7 +384,7 @@ def commands(user_input):
     # HELP help
     elif command == "help":
         jmsg("commands: about, help, pwd, ls, cd, date, time, del, exit, mk, mkdir, make...")
-        jout("           rm, rmdir, echo, clear, man, key, output, perm, touch, color.")
+        jout("           rm, rmdir, echo, clear, man, key, output, perm, touch, whoami, color.")
         jout("use: man [command] for more information on a command. 'man jsh' for additional manual pages.")
         jout("use $output to use the output of the last command in your current command.")
         jout("type 'exit' to exit jshell.")
@@ -693,6 +693,24 @@ def commands(user_input):
             jerror("width error: Please enter a number.")
         jout("Width: " + str(jsh.MAX_OUTOUT_LENGTH))
         #jout("Width: " + str(os.get_terminal_size().columns))
+
+    elif command == "whoami":
+        if len(arguments) >= 1:
+            jsh.username = arguments[0]
+            jout("Your newusername is: " + jsh.username)
+        else:
+            if (jsh.username):
+                jout("Your username is " + jsh.username)
+            else:
+                jout("You do not have a username set.")
+                jout("Type your username...")
+                user_name = input()
+                if (user_name):
+                    jsh.username = user_name
+                    # Save changes to username..
+                    jsh.save_settings()
+                else:
+                    jerror("Unable to change username")
         
 
     ## X ##
@@ -712,6 +730,7 @@ def commands(user_input):
     # UNKOWN COMMAND
     else:
         jerror("command not found: '" + user_input + "'.")
+        
 
     ## END COMMAND LIST ##
         
