@@ -26,12 +26,12 @@ class jshell:
         self.userkey = jsettings['UserString']
         self.username = jsettings['UserName']
         self.output = "" # Stores the output of the last command
-        self.key = "$" # The key that appears before the command
         self.debug = False # Debug mode, default False
         self.color = True # Color mode, default True
         self.MAX_OUTOUT_LENGTH = 150 # The maximum length of the output of a command
         self.variables = {} # A dictionary to store variables
 
+    @staticmethod
     def save_settings():
         """
         Save the user settings UserName and UserString to the data.json file.
@@ -52,8 +52,8 @@ class jshell:
             data = {}
         
         # Update settings
-        data['UserName'] = jsh.userkey
-        data['UserString'] = jsh.username
+        data['UserName'] = jsh.username
+        data['UserString'] = jsh.userkey
         
         # Write updated settings back to the file
         with open(file_name, 'w') as file:
@@ -93,37 +93,52 @@ BLUE = 34
 ''' Output Functions '''
 # Printing the standard error output messages
 def jerror(err):
+
     err = str(err)
+    loop_count = 0
+    ERROR_STRING = "jsh error: "
+    ELIPSE = "..."
+
     while len(err) > 0:
         if (len(err) > jsh.MAX_OUTOUT_LENGTH):
-            print(jsh.userkey + "jsh error: " + err[:jsh.MAX_OUTOUT_LENGTH] + "...") # We know we are going to print another line below this one, so add elipses
+            print(jsh.userkey + ERROR_STRING + err[:jsh.MAX_OUTOUT_LENGTH - (len(ERROR_STRING) + len(ELIPSE))] + ELIPSE) # We know we are going to print another line below this one, so add elipses
         else:
-            print(jsh.userkey + "jsh error: " + err) # not going to print an addtional line.
+            print(jsh.userkey + ERROR_STRING + err) # not going to print an addtional line.
         err = err[jsh.MAX_OUTOUT_LENGTH:] # Remove the first 100 characters from the string that we just printed
-
+        loop_count += 1
+        if (loop_count >= 1):
+            # Only show error string on the first line
+            ERROR_STRING = ""
+        
 # Most standard output message, with the 'UserString' defined in data.json
 def jmsg(msg):
+
     msg = str(msg)
+    ELIPSE = "..."
+    JSH_STRING = "jsh: "
+
     while len(msg) > 0:
         if (len(msg) > jsh.MAX_OUTOUT_LENGTH):
-            print(jsh.userkey + "jsh: " + msg[:jsh.MAX_OUTOUT_LENGTH] + "...") 
+            print(jsh.userkey + JSH_STRING + msg[:jsh.MAX_OUTOUT_LENGTH - (len(ELIPSE) + len(ELIPSE))] + "...") 
         else:
             print(jsh.userkey + "jsh: " + msg) 
         msg = msg[jsh.MAX_OUTOUT_LENGTH:] 
 
 # Most standard output message, without the 'jsh:' prepended
 def jout(msg):
+
     msg = str(msg)
+    ELIPSE = "..."
+
     while len(msg) > 0:
         if (len(msg) > jsh.MAX_OUTOUT_LENGTH):
-            print(msg[:jsh.MAX_OUTOUT_LENGTH] + "...") # We know we are going to print another line below this one, so add elipses
+            print(msg[:jsh.MAX_OUTOUT_LENGTH - len(ELIPSE)] + ELIPSE) # We know we are going to print another line below this one, so add elipses
         else:
             print(msg) # not going to print an addtional line.
         msg = msg[jsh.MAX_OUTOUT_LENGTH:] # Remove the first 100 characters from the string that we just printed
 
 
 ''' Utilities '''
-
 # Utility to remove a directory specified
 def rm_dir(rm_directory):
     try:
@@ -376,13 +391,16 @@ def commands(user_input):
 
     # KEY lets a user define which symbol appears before their command
     elif command == "key":
-        set_key = jsh.directory = user_input[4:]
+        set_key = user_input[4:]
         if (len(set_key) <= 0):
             set_key = input("Please enter the key you would like to set: ")
             
         # Set the key
-        jsh.key = set_key
-        jmsg("Key set to: " + jsh.key)
+        jsh.userkey = str(set_key)
+        jmsg("Key set to: " + jsh.userkey)
+
+        # Save the key to data.json
+        jsh.save_settings()
         
     ## I ##
     ## J ##
@@ -711,7 +729,7 @@ def main():
     os.system("clear")
     jsh.directory = os.path.abspath(os.curdir)
     while True:
-        print(jsh.key + " ", end="")
+        print(jsh.userkey + " ", end="")
         commands(input())
 
 ''' Start Up '''
@@ -723,6 +741,8 @@ jsettings = json.load(usersettings)
 # Creat the Jshell Object to store data about the perons shell
 
 jsh = jshell()
+usersettings.close()
+
 main()
 
 # TODO:
