@@ -30,6 +30,7 @@ class jshell:
         self.color = True # Color mode, default True
         self.MAX_OUTOUT_LENGTH = 150 # The maximum length of the output of a command
         self.variables = {} # A dictionary to store variables
+        self.last_command_output = "" # A string that stores what was sent to jmsg last
 
     @staticmethod
     def save_settings():
@@ -58,6 +59,11 @@ class jshell:
         # Write updated settings back to the file
         with open(file_name, 'w') as file:
             json.dump(data, file, indent=4)
+
+    # Used for testing to execute a command
+    def execute_command(self, command):
+        input(command)
+        return self.last_command_output
 
 
 class Variable:
@@ -89,6 +95,7 @@ class ANSI():
 # Color Codes
 PURPLE = 35
 BLUE = 34
+Debug = False
 
 ''' Output Functions '''
 # Printing the standard error output messages
@@ -114,6 +121,7 @@ def jerror(err):
 def jmsg(msg):
 
     msg = str(msg)
+    jsh.last_command_output = str(msg)
     ELIPSE = "..."
     JSH_STRING = "jsh: "
 
@@ -128,6 +136,7 @@ def jmsg(msg):
 def jout(msg):
 
     msg = str(msg)
+    jsh.last_command_output = str(msg)
     ELIPSE = "..."
 
     while len(msg) > 0:
@@ -741,6 +750,7 @@ def commands(user_input):
        jout(f"Arguments: {arguments}")
        jout(f"User Input: {user_input}")
        jout(f"jshell Output: {jsh.output}")
+       jout(f"jshell Last Output: {jsh.last_command_output}")
        jout('') # extra line
 
 ''' Main '''
@@ -759,10 +769,11 @@ jsettings = json.load(usersettings)
 
 # Creat the Jshell Object to store data about the perons shell
 
+global jsh
 jsh = jshell()
 usersettings.close()
-
-main()
+if __name__ == "__main__":
+    main()
 
 # TODO:
 # Add -a to LS to show the hidden files (currently it always shows the hidden files)
