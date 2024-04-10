@@ -26,7 +26,7 @@ class jshell:
         self.userkey = jsettings['UserString']
         self.username = jsettings['UserName']
         self.output = "" # Stores the output of the last command
-        self.debug = False # Debug mode, default False
+        self.debug = jsettings['DebugMode'] # Debug mode, default False, user configruable from data.json
         self.color = True # Color mode, default True
         self.MAX_OUTOUT_LENGTH = 150 # The maximum length of the output of a command
         self.variables = {} # A dictionary to store variables
@@ -55,6 +55,7 @@ class jshell:
         # Update settings
         data['UserName'] = jsh.username
         data['UserString'] = jsh.userkey
+        data['DebugMode'] = jsh.debug
         
         # Write updated settings back to the file
         with open(file_name, 'w') as file:
@@ -348,6 +349,7 @@ def commands(user_input):
         else:
             jsh.debug = True
             jmsg("debug mode on")
+        jsh.save_settings()
         
 
     
@@ -768,10 +770,12 @@ jsettings = json.load(usersettings)
 
 
 # Creat the Jshell Object to store data about the perons shell
-
 global jsh
 jsh = jshell()
+
+# Close the data.json file so it does not get corrupted
 usersettings.close()
+
 if __name__ == "__main__":
     main()
 
