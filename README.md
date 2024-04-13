@@ -7,6 +7,28 @@ A very simple command line shell in the style of Bash. Completely change, and *m
 I developed in Python for personal use, and can use it to completely replace Bash, Zsh, or Fish for *non-complex* daily use!
 It is encouraged to branch the code and create your own version and add your own commands!
 
+## Features
+
+- Basic file and directory management commands (ls, cd, mkdir, rm, etc.)
+- File manipulation commands (cat, touch, cp, etc.)
+- System information commands (date, time, whoami, etc.)
+- Customizable user settings (username, command prompt, color mode, etc.)
+- Variable support for command output and user-defined variables
+- Debug mode for detailed command execution information
+- Built-in help and manual pages for commands
+
+## Getting Started
+
+1. Clone the repository: `git clone https://github.com/your-username/jshell.git`
+2. Navigate to the project directory: `cd jshell`
+3. Run the jshell program: `python jshell.py`
+
+For more detailed instructions, refer to the [QUICKSTART.md](QUICKSTART.md) guide.
+
+## Documentation
+
+For a comprehensive guide on jshell's features, commands, and technical details, please refer to the [TECHNICAL_GUIDE.md](TECHNICAL_GUIDE.md) document.
+
 ## Commands:
 jshell is built around commands, learn how to use them below. Commands are entered one at a time, and they usualy give an expected output, or change something on your system
 
@@ -52,6 +74,14 @@ Jshell offers manual pages built in to the termianl.
 Type `man {command}` to read that command's manual.
 Commands with a manual right now are: jsh, ls, perm, and key.
 
-version: `0.5.1 beta`. build: `0240314e`
+## Contributing
+
+Contributions are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+version: `0.5.3 beta`. build: `0240412b`
 
 *jshell* (**c**) 2024 Joey Miller.

@@ -19,8 +19,8 @@ from datetime import datetime
 class jshell:
     key = ">" # Key to start a command
     def __init__(self):
-        self.build = "0240314e" # Example: 0230417e -> 023 (2023) 04 (April) 17 (17th) e (5th build of the day)
-        self.version = "0.5.1" # Main version number
+        self.build = "0240412b" # Example: 0230417e -> 023 (2023) 04 (April) 17 (17th) e (5th build of the day)
+        self.version = "0.5.3" # Main version number
         self.release = "beta" # Alpha, Beta, Release
         self.directory = "" # Stores the current directory the terminal is modifying
         self.userkey = jsettings['UserString']
@@ -802,3 +802,5 @@ if __name__ == "__main__":
 # Have a flag array flag[1] = "-l" flag[2] = "-h" flag[3] = "-c"
 # Have a arguments array command = "ls" arguments[1] = "file.txt" arguments[2] = "777"
 # Have one variable for the command itself. command = "ls"
+
+# Add ability to change the home directory of the user (directory used on startup)
