@@ -153,11 +153,15 @@ def jout(msg):
 def rm_dir(rm_directory):
     try:
         os.rmdir(rm_directory)
-        jmsg("removed directory: " + rm_directory)
     except FileNotFoundError:
         jerror("not a valid directory: " + rm_directory)
     except:
         jerror("can't remove directory: " + rm_directory)
+    else:
+        jmsg("removed directory: " + rm_directory)
+    finally:
+        # Just wanted to show the use of the this keyword in Pyhton.
+        removed = True
 
 def change_file_permissions(file_path, permissions):
     # Convert the string permissions to an octal number
@@ -399,7 +403,20 @@ def commands(user_input):
         jout("use: man [command] for more information on a command. 'man jsh' for additional manual pages.")
         jout("use $output to use the output of the last command in your current command.")
         jout("type 'exit' to exit jshell.")
+        
+    ## I ##
+    elif command == "input":
+        jout("Input: " + user_input)
+        jout("Command: " + command)
+        jout("Options: " + str(options))
+        jout("Arguments: " + str(arguments))
+        jout("User Input: " + user_input)
+        jout("jshell Output: " + jsh.output)
+        jout("jshell Last Output: " + jsh.last_command_output)
+        jout('')
 
+    ## J ##
+    ## K ##
     # KEY lets a user define which symbol appears before their command
     elif command == "key":
         set_key = user_input[4:]
@@ -412,10 +429,6 @@ def commands(user_input):
 
         # Save the key to data.json
         jsh.save_settings()
-        
-    ## I ##
-    ## J ##
-    ## K ##
     ## L ##
 
     # LIST FILES ls
