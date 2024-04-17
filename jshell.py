@@ -1,5 +1,5 @@
 #############################
-#    jshell                 #
+#    JShell                 #
 # light weight macOS shell  #
 #  in the style of bash     #
 #############################
@@ -14,9 +14,9 @@ import json
 from datetime import date
 from datetime import datetime
 
-''' Jshell Classes '''
-# Information about jshell, system and user settings
-class jshell:
+''' JShell Classes '''
+# Information about JShell, system and user settings
+class JShell:
     key = ">" # Key to start a command
     def __init__(self):
         self.build = "0240412b" # Example: 0230417e -> 023 (2023) 04 (April) 17 (17th) e (5th build of the day)
@@ -209,68 +209,34 @@ def process_input(user_input, variables):
 ''' Main Loop for the user commands'''
 def commands(user_input):
 
-    ''' First Replace Any Variables in User Input '''
-    # Replace stock variable, $output, with the output of the last command
-    # Relace $output with the output of the last command
-    if (jsh.output != ""):
-        ser_input = user_input.replace("$output", str(jsh.output))
-
-    # Replace any other variables
-    IF_VARIABLE = False # Used in input to check if the user is creating a variable
+    # Check if the user input is a variable redefinition
+    if jsh.output != "":
+        user_input = user_input.replace("$output", str(jsh.output))
     user_input_old = user_input
     user_input = process_input(user_input, jsh.variables)
+    IF_VARIABLE = user_input != user_input_old
 
-    if user_input != user_input_old:
-        IF_VARIABLE = True
-
-    ''' Create any new variables 
-    # Regex pattern to match variable definitions
-    # This pattern assumes variable names are alphanumeric + underscore, and values are in double quotes
-    pattern = r'\$(\w+)\s*=\s*"([^"]*)"'
-    # Find all matches in the user input
-    matches = re.findall(pattern, user_input)
-    
-    IF_VARIABLE = False # Used in input to check if the user is creating a variable
-    # Iterate over matches and assign to dictionary
-    for match in matches:
-        variable_name, variable_value = match
-        jsh.variables[variable_name] = variable_value
-        jmsg(f"Created variable '{variable_name}' with value '{variable_value}'")
-        IF_VARIABLE = True # The user created a variable
-    '''
-
-    ''' Break Up User Input '''
-    # Split the string by spaces
+    # Split the user input into its consituent parts
     parts = user_input.split()
-    # Initialize variables
     command = ""
     options = []
     arguments = []
-    # Process each option
     for part in parts:
-        if part.startswith('-') and not command:  # Assuming options only come after the command
-            # Extract options and remove the dash, then convert to a list for individual access
+        if part.startswith('-') and not command:
             options.extend(list(part[1:]))
         elif not command:
-            # The first non-option option is the command
             command = part
         else:
-            # Everything else is considered an argument
             arguments.append(part)
-    '''
-    For future reference:
-    for option in options: 
-        print(f"Option: {option}")
-    '''
 
     ## START COMMAND LIST ##
     # This is where we start checking user_input for commands
     ## A ##
-    # ABOUT about prints the build of jshell
+    # ABOUT about prints the build of JShell
     if user_input == "about":
         if jsh.debug:
-            jmsg("jshell build: " + jsh.build + " build:" + jsh.version)
-        jmsg("jshell build " + jsh.version)
+            jmsg("JShell build: " + jsh.build + " build:" + jsh.version)
+        jmsg("JShell build " + jsh.version)
     
     ## B ##
     ## C ##
@@ -300,7 +266,7 @@ def commands(user_input):
         jmsg("cat error: Please enter a file to print the contents of.")
     
     # (Change Directory) command: cd
-    elif command == "cd" or command == "chdir":
+    elif command in ["cd", "chdir"]:
         if arguments[0] == "..":
             os.chdir("..")
             jsh.directory = os.path.abspath(os.curdir)
@@ -314,7 +280,7 @@ def commands(user_input):
             except:
                 jerror("unknown error: " + jsh.directory)
 
-    elif command == "cp" or command == "copy":
+    elif command in ["cp", "copy"]:
         if re.match("cp (.*) (.*)", user_input):
             file_to_copy = arguments[0]
             new_file = arguments[1]
@@ -331,7 +297,7 @@ def commands(user_input):
             jerror("cp error: Please enter a file to copy and a new file to copy it to.")
 
     # CLEAR (Clear the terminal screen)
-    elif command == "clear" or command == "cls":
+    elif command in ["clear", "cls"]:
         clear = lambda: os.system('clear')
         clear()
     
@@ -358,7 +324,7 @@ def commands(user_input):
 
     
     # DELETE del
-    elif command == "del" or command == "rm" or command == "delete":
+    elif command in ["del", "rm", "delete"]:
         if re.match("del (.*)", user_input):
             remove_file = arguments[0]
         else:
@@ -389,7 +355,8 @@ def commands(user_input):
         jout(echo)
 
     # EXIT exit
-    elif user_input == "exit" or user_input == "quit" or user_input == "q" or user_input == "close" or user_input == "bye" or user_input == "goodbye" or user_input == "end" or user_input == "stop" or user_input == "halt" or user_input == "terminate" or user_input == "kill" or user_input == "destroy":
+    # Note: The reason for using so many different keywords to exit, is no one likes to not be able to close a program, and these keywords are all common in different applications.
+    elif user_input in ["exit", "quit", "q", "close", "bye", "goodbye", "end", "stop", "halt", "terminate", "kill", "destroy"]:
         sys.exit()
 
     ## F ##
@@ -402,7 +369,7 @@ def commands(user_input):
         jout("           rm, rmdir, echo, clear, man, key, output, perm, touch, whoami, color.")
         jout("use: man [command] for more information on a command. 'man jsh' for additional manual pages.")
         jout("use $output to use the output of the last command in your current command.")
-        jout("type 'exit' to exit jshell.")
+        jout("type 'exit' to exit JShell.")
         
     ## I ##
     elif command == "input":
@@ -411,8 +378,8 @@ def commands(user_input):
         jout("Options: " + str(options))
         jout("Arguments: " + str(arguments))
         jout("User Input: " + user_input)
-        jout("jshell Output: " + jsh.output)
-        jout("jshell Last Output: " + jsh.last_command_output)
+        jout("JShell Output: " + jsh.output)
+        jout("JShell Last Output: " + jsh.last_command_output)
         jout('')
 
     ## J ##
@@ -432,7 +399,7 @@ def commands(user_input):
     ## L ##
 
     # LIST FILES ls
-    elif command == "ls" or command == "list":
+    elif command in ["ls", "list"]:
         LOOP = 0 # Used to not add spacing to the first loop in the long flag list.
         # Check flags
         human_readable = False
@@ -528,7 +495,7 @@ def commands(user_input):
     ## M ##
                     
     # MAKE FILE make or mk
-    elif command == "make" or command == "mk":
+    elif command in ["make", "mk"]:
         try:
             new_file = user_input[5:]
             open(new_file, 'w').close() 
@@ -537,7 +504,7 @@ def commands(user_input):
             jerror("can't make file: " + new_file) 
 
     # MAKE DIRECTORY mkdir or mkd
-    elif (command == "mkdir" or command == "mkd" or command == "makefolder" or command == "folder" or command == "makedir"):
+    elif command in ["mkdir", "mkd", "makefolder", "folder", "makedir"]:
         try:
             jsh.directory = arguments[0]
             os.mkdir(jsh.directory)
@@ -591,7 +558,7 @@ def commands(user_input):
 
         # JShell Manual
         elif user_input == "man jsh":
-            jout("How to use jshell:")
+            jout("How to use JShell:")
             jout("Commands: about, help, pwd, ls, cd, date, time, del, exit, mk, mkdir, make, rm, rmdir, echo, clear, color, man, key, output, perm, touch.")
             jout("Color Mode: type 'color' to turn on/off color mode. This will show the output in color.")
             jout("Variables: You can use the $output variable to use the output of the last command that shows an output in your current command.")
@@ -599,26 +566,18 @@ def commands(user_input):
             jout("           Example: $name = 'John'. Variables can be an integer or number. They cannot be assigned to eachother.")
             jout("           See a list of made variables by typing 'variable' or 'var. Variables can be used in the same way as $output.")
             jout("Debug Mode: type 'debug' to turn on/off debug mode. This will show additional information about the command.")
-            jout("type 'exit' to exit jshell.")
+            jout("type 'exit' to exit JShell.")
 
         # User did not specify which command to get a manaul for
         elif command == "man":
             jmsg("man error: Manual for commands. Enter a command after 'man' to read its manual.")
             jout("  Supported commands: ls, perm. key")
 
-    # MAKE jsh.directory mkdir or mkd
-    elif (re.match("mkdir (.*)", user_input) or re.match("mkd (.*)", user_input)):
-        try:
-            jsh.directory = user_input[6:]
-            os.mkdir(jsh.directory)
-        except:
-            jerror("can't make jsh.directory: " + jsh.directory)
-
     ## N ##
     ## O ##
             
     # OUTPUT output or out
-    elif command == "output" or command == "out":
+    elif command in ["output", "out"]:
         print(jsh.output)
 
     ## P ##
@@ -704,7 +663,7 @@ def commands(user_input):
 
     ## U ##
     ## V ##
-    elif command == "var" or command == "variable":
+    elif command in ["var", "variable"]:
         jmsg("Variables:")
         for var in jsh.variables.values():
             jout(f"Name: {var.name}, Value: {var.value}, Type: {var.type}")
@@ -764,8 +723,8 @@ def commands(user_input):
        jout(f"Options: {options}")
        jout(f"Arguments: {arguments}")
        jout(f"User Input: {user_input}")
-       jout(f"jshell Output: {jsh.output}")
-       jout(f"jshell Last Output: {jsh.last_command_output}")
+       jout(f"JShell Output: {jsh.output}")
+       jout(f"JShell Last Output: {jsh.last_command_output}")
        jout('') # extra line
 
 ''' Main '''
@@ -776,20 +735,19 @@ def main():
         print(jsh.userkey + " ", end="")
         commands(input())
 
-''' Start Up '''
-# Define the data structure settings for the shell
-usersettings = open("data.json", "r")
-jsettings = json.load(usersettings)
-
-
-# Creat the Jshell Object to store data about the perons shell
-global jsh
-jsh = jshell()
-
-# Close the data.json file so it does not get corrupted
-usersettings.close()
-
 if __name__ == "__main__":
+    ''' Start Up '''
+    # Define the data structure settings for the shell
+    usersettings = open("data.json", "r")
+    jsettings = json.load(usersettings)
+
+
+    # Creat the JShell Object to store data about the perons shell
+    global jsh
+    jsh = JShell()
+
+    # Close the data.json file so it does not get corrupted
+    usersettings.close()
     main()
 
 # TODO:
