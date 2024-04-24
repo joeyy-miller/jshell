@@ -63,6 +63,7 @@ Any words after that are taken as 'arguments' to the command. Such as using `..`
 + `version`: Get verison, build, and release information.
 + `history`: Get a list of commands that were run. 
 + `!`: Used to rerun comamnds. Type `![NUM]` with `[num]` being the number from the `history` command that you want to rerun.
++ `curl`: Retreive data from a URL. Type the url after the curl command, and it will be output in your terminal. Use the `-o` flag to download the response to a file. Example: `curl -o output.txt https://www.example.com/`
 
 ## Variables:
 Jshell can use variables.

@@ -11,6 +11,7 @@ import re
 import os
 import time
 import json
+import requests
 from datetime import date
 from datetime import datetime
 
@@ -337,6 +338,41 @@ def commands(user_input):
         else:
             jsh.color = True
             jmsg("color mode on")
+
+    # CURL (Retrieve data from a URL)
+    elif command == "curl":
+        save_to_file = None
+        # Check for '-o' option and the file name
+        if '-o' in arguments:
+            try:
+                o_index = arguments.index('-o')
+                save_to_file = arguments[o_index + 1]
+                # Remove '-o' and filename from arguments to isolate the URL
+                del arguments[o_index:o_index + 2]
+            except IndexError:
+                jerror("curl error: No file name specified after -o.")
+                return
+
+        if arguments:
+            url = arguments[0]
+            try:
+                response = requests.get(url)
+                response.raise_for_status()  # Raises an HTTPError for bad responses
+                jsh.output = response.text
+                if save_to_file:
+                    try:
+                        with open(save_to_file, 'w') as file:
+                            file.write(response.text)
+                        jmsg(f"Output saved to {save_to_file}")
+                    except IOError as e:
+                        jerror(f"Failed to write to file: {str(e)}")
+                else:
+                    jout(response.text)
+            except requests.RequestException as e:
+                jerror(f"Failed to retrieve data: {str(e)}")
+        else:
+            jerror("curl error: Please enter a URL.")
+        return
     
     ## D ##
     # DEBUG debug (adds additonal infromation for debugging)
@@ -549,6 +585,13 @@ def commands(user_input):
     # COMMAND MANUAL man
     elif command == "man":
 
+        # CURL Manual
+        if user_input == "man curl":
+            jout("curl: command to retrieve data from a URL.")
+            jout("  This command allows you to retrieve data from a URL.")
+            jout("  flags:")
+            jout("  | -o | This is the 'output' flag, it allows you to save the output to a file, followed by the name of the output file.")
+            jout("  Example: curl -o output.txt https://www.google.com")
         # LS Manual
         if user_input == "man ls":
            jout("ls: command to list files.")
