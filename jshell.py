@@ -19,8 +19,8 @@ from datetime import datetime
 class JShell:
     key = ">" # Key to start a command
     def __init__(self):
-        self.build = "0240412b" # Example: 0230417e -> 023 (2023) 04 (April) 17 (17th) e (5th build of the day)
-        self.version = "0.5.3" # Main version number
+        self.build = "0240425a" # Example: 0230417e -> 023 (2023) 04 (April) 17 (17th) e (5th build of the day)
+        self.version = "0.5.4" # Main version number
         self.release = "beta" # Alpha, Beta, Release
         self.directory = "" # Stores the current directory the terminal is modifying
         self.userkey = jsettings['UserString']
@@ -31,6 +31,7 @@ class JShell:
         self.MAX_OUTOUT_LENGTH = 150 # The maximum length of the output of a command
         self.variables = {} # A dictionary to store variables
         self.last_command_output = "" # A string that stores what was sent to jmsg last
+        self.history = [] # Stores the history of commands executed
 
     @staticmethod
     def save_settings():
@@ -209,12 +210,14 @@ def process_input(user_input, variables):
 ''' Main Loop for the user commands'''
 def commands(user_input):
 
+    
     # Check if the user input is a variable redefinition
     if jsh.output != "":
         user_input = user_input.replace("$output", str(jsh.output))
     user_input_old = user_input
     user_input = process_input(user_input, jsh.variables)
     IF_VARIABLE = user_input != user_input_old
+    # End of variable processing
 
     # Split the user input into its consituent parts
     parts = user_input.split()
@@ -228,6 +231,31 @@ def commands(user_input):
             command = part
         else:
             arguments.append(part)
+    # End of splitting the user input
+    
+    ''' HISTORY '''
+    # Add command to history if it is not empty
+    if user_input.strip() != "":
+        jsh.history.append(user_input)
+
+    # Command to display the history
+    if user_input == "history":
+        for i, cmd in enumerate(jsh.history, 1):
+            jmsg(f"{i}: {cmd}")
+        return
+
+    # Command to re-execute a command from history
+    if user_input.startswith('!'):
+        try:
+            index = int(user_input[1:]) - 1
+            if 0 <= index < len(jsh.history):
+                commands(jsh.history[index])
+            else:
+                jerror("History index out of range")
+        except ValueError:
+            jerror("Invalid history command")
+        return
+    ''' END HISTORY '''
 
     ## START COMMAND LIST ##
     # This is where we start checking user_input for commands
@@ -667,6 +695,9 @@ def commands(user_input):
         jmsg("Variables:")
         for var in jsh.variables.values():
             jout(f"Name: {var.name}, Value: {var.value}, Type: {var.type}")
+
+    elif command in ["version", "ver"]:
+        jmsg("JShell version: " + jsh.version + " build: " + jsh.build + " release: " + jsh.release)
     ## W ##
     elif command == "width":
         try:
@@ -733,7 +764,8 @@ def main():
     jsh.directory = os.path.abspath(os.curdir)
     while True:
         print(jsh.userkey + " ", end="")
-        commands(input())
+        USER_INPUT = input()
+        commands(USER_INPUT)
 
 if __name__ == "__main__":
     ''' Start Up '''

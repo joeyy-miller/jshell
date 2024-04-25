@@ -60,6 +60,9 @@ Any words after that are taken as 'arguments' to the command. Such as using `..`
 + `man`: Get manaul pages for certain commands.
 + `color`: Turn on/off color mode.
 + `debug`: Turn on/off debug mode.
++ `version`: Get verison, build, and release information.
++ `history`: Get a list of commands that were run. 
++ `!`: Used to rerun comamnds. Type `![NUM]` with `[num]` being the number from the `history` command that you want to rerun.
 
 ## Variables:
 Jshell can use variables.
