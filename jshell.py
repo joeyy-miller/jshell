@@ -692,6 +692,8 @@ def commands(user_input):
                 if (OCTAL_MODE == False):
                     # Don't convert from octal to decimal
                     mask = oct(os.stat(file_to_read).st_mode)[-3:]
+                else:
+                    mask = oct_perm
 
                 print(mask)
                 #print(oct_perm)
