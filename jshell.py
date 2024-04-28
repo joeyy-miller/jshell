@@ -20,8 +20,8 @@ from datetime import datetime
 class JShell:
     key = ">" # Key to start a command
     def __init__(self):
-        self.build = "0240425a" # Example: 0230417e -> 023 (2023) 04 (April) 17 (17th) e (5th build of the day)
-        self.version = "0.5.4" # Main version number
+        self.build = "0240429a" # Example: 0230417e -> 023 (2023) 04 (April) 17 (17th) e (5th build of the day)
+        self.version = "0.5.4.1" # Main version number
         self.release = "beta" # Alpha, Beta, Release
         self.directory = "" # Stores the current directory the terminal is modifying
         self.userkey = jsettings['UserString']
@@ -111,9 +111,9 @@ def jerror(err):
 
     while len(err) > 0:
         if (len(err) > jsh.MAX_OUTOUT_LENGTH):
-            print(jsh.userkey + ERROR_STRING + err[:jsh.MAX_OUTOUT_LENGTH - (len(ERROR_STRING) + len(ELIPSE))] + ELIPSE) # We know we are going to print another line below this one, so add elipses
+            print(ERROR_STRING + err[:jsh.MAX_OUTOUT_LENGTH - (len(ERROR_STRING) + len(ELIPSE))] + ELIPSE) # We know we are going to print another line below this one, so add elipses
         else:
-            print(jsh.userkey + ERROR_STRING + err) # not going to print an addtional line.
+            print(ERROR_STRING + err) # not going to print an addtional line.
         err = err[jsh.MAX_OUTOUT_LENGTH:] # Remove the first 100 characters from the string that we just printed
         loop_count += 1
         if (loop_count >= 1):
@@ -130,9 +130,9 @@ def jmsg(msg):
 
     while len(msg) > 0:
         if (len(msg) > jsh.MAX_OUTOUT_LENGTH):
-            print(jsh.userkey + JSH_STRING + msg[:jsh.MAX_OUTOUT_LENGTH - (len(ELIPSE) + len(ELIPSE))] + "...") 
+            print(JSH_STRING + msg[:jsh.MAX_OUTOUT_LENGTH - (len(ELIPSE) + len(ELIPSE))] + "...") 
         else:
-            print(jsh.userkey + "jsh: " + msg) 
+            print("jsh: " + msg) 
         msg = msg[jsh.MAX_OUTOUT_LENGTH:] 
 
 # Most standard output message, without the 'jsh:' prepended
@@ -530,7 +530,8 @@ def commands(user_input):
                 if (LOOP == 0):
                     if len(jsh.directory) > max_length:
                         max_length = len(jsh.directory)
-                    print(" ", end="")
+                    if (count != 0):
+                        print(" ", end="")
                 LOOP += 1
 
             for jsh.directory in dir_list:
