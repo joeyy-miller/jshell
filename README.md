@@ -39,31 +39,32 @@ Any single letter after the `-` is called an option, or flag. Use these to chang
 Any words after that are taken as 'arguments' to the command. Such as using `..` as an argument to tell the `cd` command you wish to navigate up one  directory.
 
 ### Supported Commands:
-+ `about`: Get infromation about jshell.
-+ `help`: Get help on how to use jshell.
-+ `pwd`: Get your current working directory.
-+ `cat`: This command lets you read the contents of a file. Type `cat {filename}` to get an output of the file's contents printed in your terminal.
-+ `ls`: List the files in your current working directory (see ls)
++ `about`: Get information about JShell.
++ `cat`: Read the contents of a file. Type `cat {filename}` to output the file's contents in your terminal.
 + `cd`: Change directory. Use `cd ..` to move up a directory.
-+ `date`: Get the current date, and set that to the `$output` variable.
-+ `time`: Get the current time, and set that to the `$output` variable.
++ `clear`: Clear the terminal screen.
++ `color`: Toggle color mode on or off.
++ `curl`: Retrieve data from a URL. Type the URL after the curl command to output it in your terminal. Use the `-o` flag to download the response to a file. Example: `curl -o output.txt https://www.example.com/`
++ `date`: Get the current date, and set it to the `$output` variable.
++ `debug`: Toggle debug mode on or off.
 + `del` or `rm`: Delete a file or folder.
++ `echo`: Echo whatever you type as arguments to the terminal.
 + `exit`: Exit the terminal.
-+ `mk` or `touch`: Make a file! Use `touch file_name.txt` to create a file named `file_name.txt`.
++ `help`: Get help on how to use JShell.
++ `history`: Get a list of commands that were run.
++ `ls`: List the files in your current working directory.
++ `man`: Get manual pages for certain commands.
 + `mkdir`: Make a directory in your current working directory.
++ `mk` or `touch`: Create a file! Use `touch file_name.txt` to create a file named `file_name.txt`.
++ `output`: Tell you the value of the standard `$output` variable.
++ `perm`: Change the permissions of a folder or file. Type `perm filename.txt` by itself to retrieve the permissions, or type `perm filename.txt 777` to change an example file called `filename.txt` to have full read, write, and execute permissions (777 in shorthand).
++ `pwd`: Get your current working directory.
 + `rmdir`: Remove a directory.
-+ `echo`: Echo whatever you type as aguments to the terminal.
-+ `output`: Tell you the value of the standard $output variable.
-+ `perm`: Change the permissions of a folder or file. Type `perm filename.txt` by itself to retreive the permissions, or type `perm filename.txt 777` to change an example file called `filename.txt` to have full read, write, and access permissions (777 in shorthand). 
-+ `clear`: Clear the screen.
-+ `width`: Set your screen width. The first arugment is an int with the new with.
-+ `man`: Get manaul pages for certain commands.
-+ `color`: Turn on/off color mode.
-+ `debug`: Turn on/off debug mode.
-+ `version`: Get verison, build, and release information.
-+ `history`: Get a list of commands that were run. 
-+ `!`: Used to rerun comamnds. Type `![NUM]` with `[num]` being the number from the `history` command that you want to rerun.
-+ `curl`: Retreive data from a URL. Type the url after the curl command, and it will be output in your terminal. Use the `-o` flag to download the response to a file. Example: `curl -o output.txt https://www.example.com/`
++ `time`: Get the current time, and set it to the `$output` variable.
++ `version`: Get version, build, and release information.
++ `width`: Set your screen width. The first argument is an integer with the new width.
++ `!`: Rerun commands. Type `![NUM]` with `[NUM]` being the number from the `history` command that you want to rerun.
+
 
 ## Variables:
 Jshell can use variables.

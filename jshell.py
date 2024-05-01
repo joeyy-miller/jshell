@@ -149,7 +149,23 @@ def jout(msg):
             print(msg) # not going to print an addtional line.
         msg = msg[jsh.MAX_OUTOUT_LENGTH:] # Remove the first 100 characters from the string that we just printed
 
-
+# New Output Function
+# Usage:
+#print_output("Message here")
+#print_output("Error message here", error=True)
+def print_output(msg, error=False, prefix=True):
+    prefix_text = "jsh error: " if error else "jsh: "
+    output_type = jsh.last_command_output if prefix else ""
+    msg = str(msg)
+    while len(msg) > 0:
+        if len(msg) > jsh.MAX_OUTPUT_LENGTH:
+            end_char = "..." if len(msg) > jsh.MAX_OUTPUT_LENGTH else ""
+            print(f"{prefix_text}{output_type}{msg[:jsh.MAX_OUTPUT_LENGTH - len(prefix_text) - len(end_char)]}{end_char}")
+            msg = msg[jsh.MAX_OUTPUT_LENGTH:]
+        else:
+            print(f"{prefix_text}{output_type}{msg}")
+            msg = ""
+    
 ''' Utilities '''
 # Utility to remove a directory specified
 def rm_dir(rm_directory):
@@ -419,8 +435,7 @@ def commands(user_input):
         jout(echo)
 
     # EXIT exit
-    # Note: The reason for using so many different keywords to exit, is no one likes to not be able to close a program, and these keywords are all common in different applications.
-    elif user_input in ["exit", "quit", "q", "close", "bye", "goodbye", "end", "stop", "halt", "terminate", "kill", "destroy"]:
+    elif user_input in ["exit", "quit", "bye"]:
         sys.exit()
 
     ## F ##
@@ -780,6 +795,8 @@ def commands(user_input):
     elif IF_VARIABLE:
         # If the user created a variable, let them know it was created, without causing a no input error.
         test = 0
+        if Debug:
+            jout("Variable created.")
         
 
     # ERRORS
