@@ -258,7 +258,7 @@ def commands(user_input):
     # Command to display the history
     if user_input == "history":
         for i, cmd in enumerate(jsh.history, 1):
-            jmsg(f"{i}: {cmd}")
+            jout(f"{i}: {cmd}")
         return
 
     # Command to re-execute a command from history
@@ -761,11 +761,12 @@ def commands(user_input):
         jmsg("JShell version: " + jsh.version + " build: " + jsh.build + " release: " + jsh.release)
     ## W ##
     elif command == "width":
-        try:
-            width = int(arguments[0])
-            jsh.MAX_OUTOUT_LENGTH = width
-        except:
-            jerror("width error: Please enter a number.")
+        if len(arguments) == 1:
+            try:
+                width = int(arguments[0])
+                jsh.MAX_OUTOUT_LENGTH = width
+            except:
+                jerror("width error: Please enter a number.")
         jout("Width: " + str(jsh.MAX_OUTOUT_LENGTH))
         #jout("Width: " + str(os.get_terminal_size().columns))
 
